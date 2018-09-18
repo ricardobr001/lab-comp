@@ -1,0 +1,14 @@
+@ce(11, "';' expected", 
+  "';' expected", 
+  "")
+
+class Program {
+
+    public void run() {
+
+    	int i;
+	    i = 0;
+	    i = i 1;
+    }
+
+}

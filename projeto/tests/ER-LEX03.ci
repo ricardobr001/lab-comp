@@ -1,0 +1,8 @@
+@ce(5, "Número -2147483647 está fora dos limites permitidos", "literal int out of limits", "lexer.Lexer.nextToken()")
+      
+class Program 
+
+    func run {
+       write( -2147483647 ); 
+    }
+end

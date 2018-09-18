@@ -1,0 +1,8 @@
+@cep(5, "Testa se '\' não é aceito como válido", "Unknown character '\'", "lexer.Lexer.nextToken()")
+  
+class Program 
+      
+    func run {
+        write(3\4);  
+    }
+end
