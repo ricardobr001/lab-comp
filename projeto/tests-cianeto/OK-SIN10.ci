@@ -1,0 +1,52 @@
+/*
+Ricardo Mendes Leal Junior
+ricardomlealjr@gmail.com
+*/
+@nce
+
+/*
+  @filename   ok-sin10.kra
+
+  @comment    Testa escrita com super e this (variaveis de instancia e metodos).
+  */
+open
+class A
+    private var Int n;
+
+    public func get -> Int {
+        return self.n;
+    }
+
+    public set: Int pn {
+        self.n = pn;
+    }
+end
+
+class B extends A
+    private var Int k;
+
+    public func m {
+        var Int i;
+
+        i = In.readInt;
+        self.k = In.readInt;
+        super set: 0;
+        Out.println: super get, self.get, self.k, i;
+    }
+
+    public print {
+        Out.println: self.k;
+    }
+end
+
+class Program
+    func run {
+        var B b;
+
+        b = B.new;
+        b.set: 1;
+        b.m;
+    }
+end
+
+
