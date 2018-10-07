@@ -1,0 +1,7 @@
+# Ignorando arquivos do intelliJ IDEA
+.idea
+out
+projeto.iml
+
+# Ignorando saida do compilador 'report.txt'
+report.txt
