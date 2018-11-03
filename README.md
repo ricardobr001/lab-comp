@@ -29,7 +29,7 @@ Parcialmente fornecida no compilador base
             - [x] ifStat    `?`
             - [x] writeStat `?`
             - [ ] assignExpr `TODO`
-            - [ ] expr `TODO`
+            - [ ] expr `TODO Cabuloso`
 
 
 
@@ -40,7 +40,7 @@ Nenhuma chamada criada por enquanto
 # Análise Semântica
 Necessário implementação por completo
 
-Para analisar se a expr é Boolean iremos ver se os tipos das variaveis são os mesmos e se possui `==` | `<` | `>` | `<=` | `>=` | `! =`
+Para analisar se a expr é Boolean iremos ver se os tipos das variaveis são os mesmos e se possui `==` | `<` | `>` | `<=` | `>=` | `!=`
 
 # Updates
 Classes em Cianeto são definidas como no exemplo abaixo

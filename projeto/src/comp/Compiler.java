@@ -503,7 +503,7 @@ public class Compiler {
 
     }
 
-    // simpleExpr ::= SumSubExpression { “++” SumSubExpression }
+    // simpleExpr ::= SumSubExpression { '++' SumSubExpression }
     private void simpleExpr() {
 
     }
@@ -523,7 +523,7 @@ public class Compiler {
 
     }
 
-    // factor ::= BasicValue | “(” Expression “)” | “!” Factor | “nil” | ObjectCreation | PrimaryExpr
+    // factor ::= BasicValue | '(' Expression ')' | '!' Factor | 'nil' | ObjectCreation | PrimaryExpr
     private void factor() {
 
     }
@@ -531,6 +531,23 @@ public class Compiler {
     // basicValue ::= IntValue | BooleanValue | StringValue
     private void basicValue() {
 
+    }
+
+    // objectCreation ::= Id '.' 'new'
+    private void objectCreation() {
+    }
+
+    // primaryExpr ::= 'super' '.' IdColon ExpressionList | 'super' '.' Id | Id | Id '.' Id | Id '.' IdColon ExpressionList | 'self' | 'self' '.' Id |
+                    // 'self' '.' IdColon ExpressionList | 'self' '.' Id '.' IdColon ExpressionList | 'self' '.' Id '.' Id | ReadExpr
+    private void primaryExpr() {
+    }
+
+    // exprList ::= Expression { ',' Expression }
+    private void exprList() {
+    }
+
+    // readExpr ::= 'In' '.' [ 'readInt' | 'readString' ]
+    private void readExpr() {
     }
 
     // fieldDec ::= 'var' Type IdList ';'
@@ -612,6 +629,7 @@ public class Compiler {
      * uncomment it
      * implement the methods it calls
      */
+    // assertStat ::= 'assert' Expression ',' StringValue
     public Statement assertStat() {
 
         lexer.nextToken();
