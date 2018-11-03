@@ -14,8 +14,24 @@ Parcialmente fornecida no compilador base
 - [x] classDec
 - [x] memberList
 - [x] qualifier
-- [ ] fieldDec
-- [ ] methodDec
+- [x] fieldDec
+    - [x] type | BasicType | Id
+- [x] methodDec
+    - [ ] formalParamDec `TODO`
+        - [ ] paramDec `TODO`
+    - [x] statementList
+        - [ ] statement
+            - [x] localDec
+            - [x] repeatStat `?`
+            - [x] breakStat
+            - [x] returnStat
+            - [x] whileStat
+            - [x] ifStat    `?`
+            - [x] writeStat `?`
+            - [ ] assignExpr `TODO`
+            - [ ] expr `TODO`
+
+
 
 ### Chamadas feitas
 Nenhuma chamada criada por enquanto
@@ -23,6 +39,8 @@ Nenhuma chamada criada por enquanto
 
 # Análise Semântica
 Necessário implementação por completo
+
+Para analisar se a expr é Boolean iremos ver se os tipos das variaveis são os mesmos e se possui `==` | `<` | `>` | `<=` | `>=` | `! =`
 
 # Updates
 Classes em Cianeto são definidas como no exemplo abaixo
@@ -34,3 +52,13 @@ end
 ```
 
 Diferente do pdf, onde uma classe é definida com uso de `{` `}`
+
+
+Atributos em Cianeto podem terminar ou não com `;`
+
+```
+class Foo
+    var Int bar; // Ok
+    var Int foo  // Ok
+end
+```

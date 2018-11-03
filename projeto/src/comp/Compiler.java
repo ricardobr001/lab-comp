@@ -218,6 +218,7 @@ public class Compiler {
     }
 
     // memberList ::= { [ qualifier ] member }
+    //                  Se não entrar em nada no qualifier, assume que o metodo ou atributo eh publico
     private void memberList() {
         // Enquanto houver um metodo
         while (true) {
@@ -249,44 +250,86 @@ public class Compiler {
         }
     }
 
+    // methodDec ::=    'func' IdColon FormalParamDec [ '->' Type ] '{' StatementList '}' |
+    //                  'func' Id [ '->' Type ] '{' StatementList '}'
     private void methodDec() {
-        lexer.nextToken();
+        // TODO: Adicionar o Id encontrar na tabela hash (Semantica)
+        next(); // Ja verificou se tinha 'func' na chamada anterior
+
+        // Se for apenas ID, o metodo nao possui parametros
         if (lexer.token == Token.ID) {
             // unary method
-            lexer.nextToken();
+            next();
 
-        } else if (lexer.token == Token.IDCOLON) {
+        }
+        // Se nao pode ser um metodo ('Identifier:') com parametros
+        else if (lexer.token == Token.IDCOLON) {
+            next();
+            formalParamDec();
             // keyword method. It has parameters
-
         } else {
             error("An identifier or identifer: was expected after 'func'");
         }
+
+        // Se encontrar '->', o metodo retorna alguma coisa
         if (lexer.token == Token.MINUS_GT) {
             // method declared a return type
-            lexer.nextToken();
+            next();
             type();
         }
+
+        // Verifica se o token eh diferente '{'
         if (lexer.token != Token.LEFTCURBRACKET) {
             error("'{' expected");
         }
+
         next();
         statementList();
+
+        // Verifica se o token eh diferente '}'
         if (lexer.token != Token.RIGHTCURBRACKET) {
             error("'{' expected");
         }
-        next();
 
+        next();
     }
 
+    // formalParamDec ::= paramDec { ',' ParamDec }
+    private void formalParamDec() {
+        // TODO: Implementar formalParamDec
+    }
+
+    // paramDec ::= Type Id
+    private void paramDec() {
+        // TODO: Implementar paramDec
+    }
+
+    // statementList ::= { Statement }
     private void statementList() {
         // only '}' is necessary in this test
-        while (lexer.token != Token.RIGHTCURBRACKET && lexer.token != Token.END) {
+        // Continua chamando o statement, se for diferente de '}' e 'end'
+        // Em outras palavras, continua
+
+        // FORNECIDO PELO PROFESSOR
+//        while (lexer.token != Token.RIGHTCURBRACKET && lexer.token != Token.END) {
+//              statement();
+//         }
+
+        // Continua chamando o statement, se for diferente de '}'
+        // Em outras palavras, continua montando o statement até chegar no fim do metodo
+        while (lexer.token != Token.RIGHTCURBRACKET) {
             statement();
         }
     }
 
+    // statement ::=    AssignExpr ';' | IfStat | WhileStat | ReturnStat ';' |
+    //                  WriteStat ';' | 'break' ';' | ';' |
+    //                  RepeatStat ';' | LocalDec ';' |
+    //                  AssertStat ';'
     private void statement() {
         boolean checkSemiColon = true;
+
+        // Verifica qual dos statement irá chamar
         switch (lexer.token) {
             case IF:
                 ifStat();
@@ -315,10 +358,14 @@ public class Compiler {
                 assertStat();
                 break;
             default:
+
+                // Se for um Id e o Id for igual a 'Out', chama o writeStat
                 if (lexer.token == Token.ID && lexer.getStringValue().equals("Out")) {
                     writeStat();
-                } else {
-                    expr();
+                }
+                // Se nao chama o Assign
+                else {
+                    assignExpr();
                 }
 
         }
@@ -327,8 +374,12 @@ public class Compiler {
         }
     }
 
+    // localDec ::= 'var' Type IdList [ '=' Expression ] [';']
     private void localDec() {
-        next();
+        // TODO: verificar se a variavel local ja foi declarada no escopo
+        // TODO: verificar se a atribuicao eh para apenas uma variavel
+        // TODO: verificar se o retorno eh compativel para a variavel
+        next(); // le token 'var'
         type();
         check(Token.ID, "A variable name was expected");
         while (lexer.token == Token.ID) {
@@ -339,89 +390,171 @@ public class Compiler {
                 break;
             }
         }
+
         if (lexer.token == Token.ASSIGN) {
             next();
             // check if there is just one variable
             expr();
         }
 
-    }
-
-    private void repeatStat() {
-        next();
-        while (lexer.token != Token.UNTIL && lexer.token != Token.RIGHTCURBRACKET && lexer.token != Token.END) {
-            statement();
+        if (lexer.token == Token.SEMICOLON){
+            next(); // Como ';' eh final, anda o token
         }
+
+    }
+
+    // repeatStat ::= 'repeat' StatementList 'until' Expression
+    private void repeatStat() {
+        // TODO: Verificar se expr é Boolean
+        next(); // le token 'repeat'
+
+        // Anotações do professor
+//        while (lexer.token != Token.UNTIL && lexer.token != Token.RIGHTCURBRACKET && lexer.token != Token.END) {
+//            statement();
+//        }
+
+        statementList();
         check(Token.UNTIL, "'until' was expected");
+        expr();
+
     }
 
+    // breakStat ::= 'break'
     private void breakStat() {
-        next();
-
+        next(); // le o token 'break'
     }
 
+    // returnStat ::= 'return' Expression
     private void returnStat() {
-        next();
+        next(); // le o token 'return'
         expr();
     }
 
-    private void whileStat() {
-        next();
+    // whileStat ::= 'while' Expression '{' StatementList '}'
+    private void whileStat()
+        // TODO: Verificar se expr é Boolean
+        next(); // le o token 'while'
         expr();
+
         check(Token.LEFTCURBRACKET, "'{' expected after the 'while' expression");
         next();
-        while (lexer.token != Token.RIGHTCURBRACKET && lexer.token != Token.END) {
-            statement();
-        }
+
+        statementList();
+
+        // Anotações do professor
+//        while (lexer.token != Token.RIGHTCURBRACKET && lexer.token != Token.END) {
+//            statement();
+//      }
+
         check(Token.RIGHTCURBRACKET, "'}' was expected");
     }
 
+    //ifStat ::= 'if' Expression '{' Statement '}' [ 'else' '{' Statement '}' ]
     private void ifStat() {
-        next();
+        // TODO: Verificar se expr é Boolean
+        next(); // le o token 'if'
         expr();
+
         check(Token.LEFTCURBRACKET, "'{' expected after the 'if' expression");
         next();
-        while (lexer.token != Token.RIGHTCURBRACKET && lexer.token != Token.END && lexer.token != Token.ELSE) {
-            statement();
-        }
+
+        statement();
         check(Token.RIGHTCURBRACKET, "'}' was expected");
+        next();
+
+//        while (lexer.token != Token.RIGHTCURBRACKET && lexer.token != Token.END && lexer.token != Token.ELSE) {
+//            statement();
+//        }
+
         if (lexer.token == Token.ELSE) {
             next();
             check(Token.LEFTCURBRACKET, "'{' expected after 'else'");
+
             next();
-            while (lexer.token != Token.RIGHTCURBRACKET) {
-                statement();
-            }
+            statement();
+
             check(Token.RIGHTCURBRACKET, "'}' was expected");
         }
     }
 
-    /**
-
-     */
+    // writeStat ::= 'Out' '.' [ 'print:' | 'println:' ] Expression (?)
     private void writeStat() {
-        next();
+        next(); // le o token 'Out'
         check(Token.DOT, "a '.' was expected after 'Out'");
+
         next();
         check(Token.IDCOLON, "'print:' or 'println:' was expected after 'Out.'");
+
         String printName = lexer.getStringValue();
+        if (!printName.equals("print:") || !printName.equals("println:")) {
+            this.error("'print:' or 'println:' was expected after 'Out.'");
+        }
+
         expr();
     }
 
+    // assignExpr ::= Expression [ '=' Expression ]
+    private void assignExpr(){
+
+    }
+
+    // expr ::= SimpleExpression [ Relation SimpleExpression ]
     private void expr() {
 
     }
 
+    // simpleExpr ::= SumSubExpression { “++” SumSubExpression }
+    private void simpleExpr() {
+
+    }
+
+    // sumSubExpr ::= Term { LowOperator Term }
+    private void sumSubExpr() {
+
+    }
+
+    // term ::= SignalFactor { HighOperator SignalFactor }
+    private void term() {
+
+    }
+
+    // signalFactor ::= [ Signal ] Factor
+    private void signalFactor() {
+
+    }
+
+    // factor ::= BasicValue | “(” Expression “)” | “!” Factor | “nil” | ObjectCreation | PrimaryExpr
+    private void factor() {
+
+    }
+
+    // basicValue ::= IntValue | BooleanValue | StringValue
+    private void basicValue() {
+
+    }
+
+    // fieldDec ::= 'var' Type IdList ';'
     private void fieldDec() {
-        lexer.nextToken();
-        type();
+        // TODO: Adicionar o Id encontrar na tabela hash (Semantica)
+        next(); // Ja verificou se tinha 'var' na chamada anterior
+        type(); // Verificado
+
+        // Se nao encontrar um Id depois do tipo, lanca um erro
         if (lexer.token != Token.ID) {
             this.error("A variable name was expected");
         } else {
+            // Enquanto existirem mais Id
             while (lexer.token == Token.ID) {
-                lexer.nextToken();
+                next(); // Anda o token
+
+                // Ve se encontrou uma virgula
                 if (lexer.token == Token.COMMA) {
-                    lexer.nextToken();
+                    next(); // Anda o token
+
+                // O ';' eh opcional, portanto se encontra-lo ou nao para o laco
+                } else if (lexer.token == Token.SEMICOLON){
+                    next(); // Como ';' eh final, anda o token
+                    break;
                 } else {
                     break;
                 }
@@ -430,12 +563,18 @@ public class Compiler {
 
     }
 
+    // type ::= BasicType | Id
     private void type() {
+        // BasicType ::= 'Int' | 'Boolean' | 'String'
         if (lexer.token == Token.INT || lexer.token == Token.BOOLEAN || lexer.token == Token.STRING) {
             next();
-        } else if (lexer.token == Token.ID) {
+        }
+        else if (lexer.token == Token.ID) {
+            // TODO: Verifica se o id existe (classe)
             next();
-        } else {
+        }
+        // Lança um erro se não for ID nem um tipo basico
+        else {
             this.error("A type was expected");
         }
 
