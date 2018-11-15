@@ -188,6 +188,7 @@ public class Compiler {
             error("Identifier expected");
         }
 
+        // TODO: adicionar a classe declarada na tabela (analise semantica)
         // Recuperando o ID da classe (nome da classe)
         String className = lexer.getStringValue();
         next();
@@ -296,12 +297,27 @@ public class Compiler {
 
     // formalParamDec ::= paramDec { ',' ParamDec }
     private void formalParamDec() {
-        // TODO: Implementar formalParamDec
+        // TODO: Adicionar na tabela para analise semantica
+        paramDec(); // Chama paramDec
+
+        // Enquanto tiver parametros, chama o paramDec
+        while (lexer.token == Token.COMMA) {
+            next(); // Consome a ','
+            paramDec();
+        }
     }
 
     // paramDec ::= Type Id
     private void paramDec() {
-        // TODO: Implementar paramDec
+        // TODO: Adicionar na tabela para analise semantica (o tipo do id)
+        type();
+
+        // Se nao encontrar um identificador apos o tipo de uma variavel, lanca um erro
+        if (lexer.token != Token.ID) {
+            error("A variable name was expected");
+        }
+
+        next(); // Consome o id
     }
 
     // statementList ::= { Statement }
@@ -316,7 +332,7 @@ public class Compiler {
 //         }
 
         // Continua chamando o statement, se for diferente de '}'
-        // Em outras palavras, continua montando o statement até chegar no fim do metodo
+        // Em outras palavras, continua montando o statement ate chegar no fim do metodo
         while (lexer.token != Token.RIGHTCURBRACKET) {
             statement();
         }
@@ -367,8 +383,9 @@ public class Compiler {
                 else {
                     assignExpr();
                 }
-
         }
+
+        // Se nao for ifStat nem whileStat, nao verifica se tem ';'
         if (checkSemiColon) {
             check(Token.SEMICOLON, "';' expected");
         }
@@ -397,6 +414,7 @@ public class Compiler {
             expr();
         }
 
+        // ';' eh opcional
         if (lexer.token == Token.SEMICOLON){
             next(); // Como ';' eh final, anda o token
         }
@@ -414,9 +432,11 @@ public class Compiler {
 //        }
 
         statementList();
-        check(Token.UNTIL, "'until' was expected");
-        expr();
 
+        check(Token.UNTIL, "'until' was expected");
+        next(); // le token 'until'
+
+        expr();
     }
 
     // breakStat ::= 'break'
@@ -431,7 +451,7 @@ public class Compiler {
     }
 
     // whileStat ::= 'while' Expression '{' StatementList '}'
-    private void whileStat()
+    private void whileStat() {
         // TODO: Verificar se expr é Boolean
         next(); // le o token 'while'
         expr();
@@ -495,42 +515,153 @@ public class Compiler {
 
     // assignExpr ::= Expression [ '=' Expression ]
     private void assignExpr(){
+        // TODO: Ver se a atribuicao eh valida (int recebe int) (float recebe float) etc...
+        expr();
 
+        // Se encontrar um '='
+        if (lexer.token == Token.ASSIGN) {
+            next(); // Le o token '='
+            expr();
+        }
     }
 
     // expr ::= SimpleExpression [ Relation SimpleExpression ]
     private void expr() {
+        simpleExpr();
 
+        // Se for uma expressao de relacao '==' | '<' | '>' | '<=' ...
+        if (relation()) {
+            next();
+            simpleExpr();
+        }
+    }
+
+    // Relation ::= '==' | '<' | '>' | '<=' | '>=' | '!='
+    private boolean relation() {
+        if (lexer.token == Token.EQ || lexer.token == Token.LT || lexer.token == Token.GT ||
+            lexer.token == Token.LE || lexer.token == Token.GE || lexer.token == Token.NEQ) {
+            return true;
+        }
+
+        return false;
     }
 
     // simpleExpr ::= SumSubExpression { '++' SumSubExpression }
     private void simpleExpr() {
+        sumSubExpr();
 
+        // Se encontrou '+'
+        // TODO: Verificar se o next() consome '+' ou '++'
+        if (lexer.token == Token.PLUS) {
+            next(); // Consome o primeiro '+'
+//            next(); // Consome o segundo
+
+            sumSubExpr();
+        }
     }
 
     // sumSubExpr ::= Term { LowOperator Term }
     private void sumSubExpr() {
+        term();
 
+        // Enquanto encontrar '+' | '-' | '||' continua no while
+        while (lowOperator()) {
+            next(); // Consome o simbolo
+            term();
+        }
+    }
+
+    private boolean lowOperator() {
+        if (lexer.token == Token.PLUS || lexer.token == Token.MINUS || lexer.token == Token.OR) {
+            return true;
+        }
+
+        return false;
     }
 
     // term ::= SignalFactor { HighOperator SignalFactor }
     private void term() {
+        signalFactor();
 
+        // Enquanto encontrar '*' | '/' | '&&' continua no while
+        while (highOperator()) {
+            next(); // Consome o simbolo
+            signalFactor();
+        }
+    }
+
+    private boolean highOperator() {
+        if (lexer.token == Token.MULT || lexer.token == Token.DIV || lexer.token == Token.AND) {
+            return true;
+        }
+
+        return false;
     }
 
     // signalFactor ::= [ Signal ] Factor
     private void signalFactor() {
+        // Pode encontrar '+' | '-', se encontrar
+        if (signal()) {
+            next(); // Consome o simbolo
+        }
 
+        factor();
+    }
+
+    private boolean signal() {
+        if (lexer.token == Token.PLUS || lexer.token == Token.MINUS) {
+            return true;
+        }
+
+        return false;
     }
 
     // factor ::= BasicValue | '(' Expression ')' | '!' Factor | 'nil' | ObjectCreation | PrimaryExpr
     private void factor() {
+        // TODO: BasicValue eh variavel do tipo INT ou INTLITERAL, STRING OU STRINGLITERAL  ?
+        switch (lexer.token) {
+            case INT:
+                basicValue();
+                break;
+            case LITERALINT:
+                basicValue();
+                break;
+            case BOOLEAN:
+                basicValue();
+                break;
+            case STRING:
+                basicValue();
+                break;
+            case LITERALSTRING:
+                basicValue();
+                break;
+            case LEFTPAR:
+                next(); // Consome o '('
+                expr();
 
+                check(Token.RIGHTPAR, "')' expected");
+                next(); // Consome o ')'
+                break;
+            case NOT:
+                factor();
+                break;
+            case NULL:
+                next(); // Le o 'nil'
+                break;
+            default:
+
+                // TODO: Verificar como identificar qual metodo chamar objectCreation | primaryExpr
+//                if (lexer.token == Token.ID) {
+//                    objectCreation();
+//                } else if (lexer) {
+//
+//                }
+        }
     }
 
     // basicValue ::= IntValue | BooleanValue | StringValue
     private void basicValue() {
-
+        next();
     }
 
     // objectCreation ::= Id '.' 'new'
@@ -584,6 +715,8 @@ public class Compiler {
     private void type() {
         // BasicType ::= 'Int' | 'Boolean' | 'String'
         if (lexer.token == Token.INT || lexer.token == Token.BOOLEAN || lexer.token == Token.STRING) {
+            // TODO: Adicionar o tipo da variavel na tabela para analise semantica
+            String idType = lexer.getStringValue();
             next();
         }
         else if (lexer.token == Token.ID) {
@@ -632,7 +765,7 @@ public class Compiler {
     // assertStat ::= 'assert' Expression ',' StringValue
     public Statement assertStat() {
 
-        lexer.nextToken();
+        next();
         int lineNumber = lexer.getLineNumber();
         expr();
         if (lexer.token != Token.COMMA) {

@@ -7,7 +7,7 @@ Fornecida no compilador base, aparentemente ok
 # Análise Sintática
 Parcialmente fornecida no compilador base
 
-### Chamadas revisadas
+### Chamadas revisadas ou criadas
 - [x] program
 - [x] annot
     - [x] annotParam
@@ -17,10 +17,10 @@ Parcialmente fornecida no compilador base
 - [x] fieldDec
     - [x] type | BasicType | Id
 - [x] methodDec
-    - [ ] formalParamDec `TODO`
-        - [ ] paramDec `TODO`
+    - [x] formalParamDec `TODO analise semantica`
+        - [x] paramDec `TODO analise semantica`
     - [x] statementList
-        - [ ] statement
+        - [x] statement
             - [x] localDec
             - [x] repeatStat `?`
             - [x] breakStat
@@ -28,13 +28,17 @@ Parcialmente fornecida no compilador base
             - [x] whileStat
             - [x] ifStat    `?`
             - [x] writeStat `?`
-            - [ ] assignExpr `TODO`
+            - [x] assignExpr `TODO analise semantica`
             - [ ] expr `TODO Cabuloso`
-
-
-
-### Chamadas feitas
-Nenhuma chamada criada por enquanto
+                - [x] relation
+                - [x] simpleExpr
+                - [x] sumSubExpr
+                    - [x] lowOperator
+                - [x] term
+                    - [x] highOperator
+                - [x] signalFactor
+                    - [x] signal
+                - [ ] factor `TODO`
 
 
 # Análise Semântica
