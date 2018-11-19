@@ -17,6 +17,6 @@ public class CianetoClass extends Type {
    private CianetoClass superclass;
    // private FieldList fieldList;
    // private MethodList publicMethodList, privateMethodList;
-   // métodos públicos get e set para obter e iniciar as variáveis acima,
-   // entre outros métodos
+   // metodos publicos get e set para obter e iniciar as variaveis acima,
+   // entre outros metodos
 }

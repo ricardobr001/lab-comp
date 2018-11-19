@@ -344,6 +344,8 @@ public class Lexer {
         return literalStringValue;
     }
 
+    public String getBooleanValue(){ return booleanValue; }
+
     public String getMetaobjectName() {
         return metaobjectName;
     }
@@ -351,7 +353,7 @@ public class Lexer {
     private String metaobjectName;
     // current token
     public Token token;
-    private String stringValue, literalStringValue;
+    private String stringValue, literalStringValue, booleanValue;
     private int numberValue;
 
     private int tokenPos;

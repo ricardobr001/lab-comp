@@ -1,4 +1,4 @@
-@ce(16, "Método com tipo de retorno deve ter pelo menos um comando return",
+@ce(16, "Metodo com tipo de retorno deve ter pelo menos um comando return",
   "Missing 'return' statement in method 'm'", 
   "comp.Compiler.methodDec()" )
  

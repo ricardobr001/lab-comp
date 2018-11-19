@@ -130,8 +130,7 @@ public class Compiler {
                 // Caso encontre uma virgula, continua o while
                 if (lexer.token == Token.COMMA) {
                     next();
-                }
-                else {
+                } else {
                     break;
                 }
             }
@@ -139,8 +138,7 @@ public class Compiler {
             // Se depois que ler o annotParam nao encontrar ')', lanca um erro
             if (lexer.token != Token.RIGHTPAR) {
                 error("')' expected after metaobject call with parameters");
-            }
-            else {
+            } else {
                 getNextToken = true;
             }
         }
@@ -184,7 +182,7 @@ public class Compiler {
         next();
 
         // Se nao encontrar um ID depois de 'class', lanca um erro
-        if (lexer.token != Token.ID){
+        if (lexer.token != Token.ID) {
             error("Identifier expected");
         }
 
@@ -198,7 +196,7 @@ public class Compiler {
             next();
 
             // Precisa existir um outro ID (uma classe herda de outra classe), se nao encontrar lanca um erro
-            if (lexer.token != Token.ID){
+            if (lexer.token != Token.ID) {
                 error("Identifier expected");
             }
 
@@ -415,7 +413,7 @@ public class Compiler {
         }
 
         // ';' eh opcional
-        if (lexer.token == Token.SEMICOLON){
+        if (lexer.token == Token.SEMICOLON) {
             next(); // Como ';' eh final, anda o token
         }
 
@@ -514,7 +512,7 @@ public class Compiler {
     }
 
     // assignExpr ::= Expression [ '=' Expression ]
-    private void assignExpr(){
+    private void assignExpr() {
         // TODO: Ver se a atribuicao eh valida (int recebe int) (float recebe float) etc...
         expr();
 
@@ -539,7 +537,7 @@ public class Compiler {
     // Relation ::= '==' | '<' | '>' | '<=' | '>=' | '!='
     private boolean relation() {
         if (lexer.token == Token.EQ || lexer.token == Token.LT || lexer.token == Token.GT ||
-            lexer.token == Token.LE || lexer.token == Token.GE || lexer.token == Token.NEQ) {
+                lexer.token == Token.LE || lexer.token == Token.GE || lexer.token == Token.NEQ) {
             return true;
         }
 
@@ -620,20 +618,17 @@ public class Compiler {
     private void factor() {
         // TODO: BasicValue eh variavel do tipo INT ou INTLITERAL, STRING OU STRINGLITERAL  ?
         switch (lexer.token) {
-            case INT:
-                basicValue();
-                break;
             case LITERALINT:
-                basicValue();
-                break;
-            case BOOLEAN:
-                basicValue();
-                break;
-            case STRING:
-                basicValue();
+                intValue();
                 break;
             case LITERALSTRING:
-                basicValue();
+                stringValue();
+                break;
+            case TRUE:
+                booleanValue();
+                break;
+            case FALSE:
+                booleanValue();
                 break;
             case LEFTPAR:
                 next(); // Consome o '('
@@ -651,34 +646,112 @@ public class Compiler {
             default:
 
                 // TODO: Verificar como identificar qual metodo chamar objectCreation | primaryExpr
-//                if (lexer.token == Token.ID) {
-//                    objectCreation();
-//                } else if (lexer) {
-//
-//                }
+                // verifica objectCreation e Id. do primaryExpr
+                if (lexer.token == Token.ID) {
+                    next();
+                    if (lexer.token == Token.DOT){
+                        next();
+                        if (lexer.token == Token.NEW){
+                            next(); // consumindo o objectCreation
+                            // TODO: Armazenar o objeto criado
+                        }else {
+                            if (lexer.token == Token.ID){
+                                next(); // consomindo Id
+                            }else if (lexer.token == Token.IDCOLON){
+                                next();
+                                exprList();
+                            }else {
+                                error("Id or IdColon was expected");
+                            }
+                        }
+                    }
+                } else {
+                    primaryExpr();
+                }
         }
     }
 
-    // basicValue ::= IntValue | BooleanValue | StringValue
-    private void basicValue() {
+    /** basicValue ::= IntValue | BooleanValue | StringValue **/
+    // IntValue ::= Digit { Digit }
+    private void intValue() {
         next();
     }
 
-    // objectCreation ::= Id '.' 'new'
-    private void objectCreation() {
+    // StringValue ::= " Letter { Letter } "
+    private void stringValue() {
+        next();
+    }
+
+    // BooleanValue ::= true || false
+    private void booleanValue() {
+        next();
     }
 
     // primaryExpr ::= 'super' '.' IdColon ExpressionList | 'super' '.' Id | Id | Id '.' Id | Id '.' IdColon ExpressionList | 'self' | 'self' '.' Id |
-                    // 'self' '.' IdColon ExpressionList | 'self' '.' Id '.' IdColon ExpressionList | 'self' '.' Id '.' Id | ReadExpr
+    // 'self' '.' IdColon ExpressionList | 'self' '.' Id '.' IdColon ExpressionList | 'self' '.' Id '.' Id | ReadExpr
     private void primaryExpr() {
+        switch (lexer.token){
+            case SUPER:
+                next(); // consome "super"
+                check(Token.DOT, "a '.' was expected after 'super'");
+                next(); // consome "."
+                if (lexer.token == Token.ID){
+                    next(); // consome o ID
+                } else if (lexer.token == Token.IDCOLON){
+                    next(); // consome o ID colon
+                    exprList();
+                } else {
+                    error("an Id or IdColon was expected");
+                }
+                break;
+            case SELF:
+                next(); // consome "super"
+                check(Token.DOT, "a '.' was expected after 'super'");
+                next(); // consome "."
+
+                if (lexer.token == Token.ID){
+                    next(); // consome o ID
+                } else if (lexer.token == Token.IDCOLON) {
+                    next(); // consome o ID colon
+                    exprList();
+                }else if (lexer.token == Token.DOT){
+                    next();
+                    if (lexer.token == Token.ID){
+                        next(); // consome o ID
+                    } else if (lexer.token == Token.IDCOLON){
+                        next(); // consome o ID colon
+                        exprList();
+                    } else {
+                        error("an Id or IdColon was expected");
+                    }
+                } else {
+                    error("an Id or IdColon or '.' was expected");
+                }
+                break;
+            case IN:
+                readExpr();
+                break;
+            default:
+                error("expected 'In', 'super' or 'self'");
+        }
     }
 
     // exprList ::= Expression { ',' Expression }
     private void exprList() {
+        expr();
+        while (lexer.token == Token.COMMA){
+            expr();
+        }
     }
 
     // readExpr ::= 'In' '.' [ 'readInt' | 'readString' ]
     private void readExpr() {
+        next(); // consome o 'In'
+        check(Token.DOT, "a '.' was expected after 'In'");
+        next();
+        if (lexer.token == Token.READINT || lexer.token == Token.READSTRING){
+            next();
+        }
     }
 
     // fieldDec ::= 'var' Type IdList ';'
@@ -699,8 +772,8 @@ public class Compiler {
                 if (lexer.token == Token.COMMA) {
                     next(); // Anda o token
 
-                // O ';' eh opcional, portanto se encontra-lo ou nao para o laco
-                } else if (lexer.token == Token.SEMICOLON){
+                    // O ';' eh opcional, portanto se encontra-lo ou nao para o laco
+                } else if (lexer.token == Token.SEMICOLON) {
                     next(); // Como ';' eh final, anda o token
                     break;
                 } else {
@@ -718,8 +791,7 @@ public class Compiler {
             // TODO: Adicionar o tipo da variavel na tabela para analise semantica
             String idType = lexer.getStringValue();
             next();
-        }
-        else if (lexer.token == Token.ID) {
+        } else if (lexer.token == Token.ID) {
             // TODO: Verifica se o id existe (classe)
             next();
         }

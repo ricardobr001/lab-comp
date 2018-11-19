@@ -2,8 +2,8 @@ package comp;
 
 /**
  * a compilation error
- * 
-   @author José
+ *
+   @author Jose
  */
 public class CompilationError {
 
@@ -13,7 +13,7 @@ public class CompilationError {
 		this.lineNumber = lineNumber;
 		this.lineWithError = lineWithError;
 	}
-	
+
 	private static final long	serialVersionUID	= 1L;
 
 	public String getMessage() {
