@@ -8,6 +8,9 @@ Fornecida no compilador base, aparentemente ok
 Parcialmente fornecida no compilador base
 
 ### Chamadas revisadas ou criadas
+Aparentemente implementada por completo
+
+
 - [x] program
 - [x] annot
     - [x] annotParam
@@ -29,7 +32,7 @@ Parcialmente fornecida no compilador base
             - [x] ifStat    `?`
             - [x] writeStat `?`
             - [x] assignExpr `TODO analise semantica`
-            - [ ] expr `TODO Cabuloso`
+            - [x] expr `TODO Cabuloso`
                 - [x] relation
                 - [x] simpleExpr
                 - [x] sumSubExpr
@@ -38,7 +41,9 @@ Parcialmente fornecida no compilador base
                     - [x] highOperator
                 - [x] signalFactor
                     - [x] signal
-                - [ ] factor `TODO`
+                - [x] factor `TODO`
+                    - [x] primaryExpr
+                        - [x] ExprList
 
 
 # Análise Semântica

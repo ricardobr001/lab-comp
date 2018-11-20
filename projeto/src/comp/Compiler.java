@@ -687,11 +687,15 @@ public class Compiler {
         next();
     }
 
-    // primaryExpr ::= 'super' '.' IdColon ExpressionList | 'super' '.' Id | Id | Id '.' Id | Id '.' IdColon ExpressionList | 'self' | 'self' '.' Id |
-    // 'self' '.' IdColon ExpressionList | 'self' '.' Id '.' IdColon ExpressionList | 'self' '.' Id '.' Id | ReadExpr
+    // primaryExpr ::=  'super' '.' IdColon ExpressionList | 'super' '.' Id |     PODE COMECAR COM SUPER
+    //                  Id | Id '.' Id | Id '.' IdColon ExpressionList |          PODE COMECAR COM ID
+    //                  'self' | 'self' '.' Id | 'self' '.' IdColon ExpressionList |          PODE COMECAR COM SELF
+    //                  'self' '.' Id '.' IdColon ExpressionList | 'self' '.' Id '.' Id |     PODE COMECAR COM SELF
+    //                  ReadExpr        OU PODE SER READEXPR
     private void primaryExpr() {
         switch (lexer.token){
             case SUPER:
+                // TODO: Verificar se a classe PAI possui o metodo ou atributo
                 next(); // consome "super"
                 check(Token.DOT, "a '.' was expected after 'super'");
                 next(); // consome "."
@@ -705,50 +709,74 @@ public class Compiler {
                 }
                 break;
             case SELF:
-                next(); // consome "super"
-                check(Token.DOT, "a '.' was expected after 'super'");
-                next(); // consome "."
+                // TODO: Verificar se a classe ATUAL possui o metodo ou atributo
+                next(); // consome "self"
 
-                if (lexer.token == Token.ID){
-                    next(); // consome o ID
-                } else if (lexer.token == Token.IDCOLON) {
-                    next(); // consome o ID colon
-                    exprList();
-                }else if (lexer.token == Token.DOT){
-                    next();
+                // Pode ter ou nao '.'
+                if (lexer.token == Token.DOT) {
+                    next(); // Consome o '.'
+
                     if (lexer.token == Token.ID){
                         next(); // consome o ID
-                    } else if (lexer.token == Token.IDCOLON){
+                    } else if (lexer.token == Token.IDCOLON) {
                         next(); // consome o ID colon
                         exprList();
+                    }else if (lexer.token == Token.DOT){
+                        next();
+                        if (lexer.token == Token.ID){
+                            next(); // consome o ID
+                        } else if (lexer.token == Token.IDCOLON){
+                            next(); // consome o ID colon
+                            exprList();
+                        } else {
+                            error("an Id or IdColon was expected");
+                        }
                     } else {
-                        error("an Id or IdColon was expected");
+                        error("an Id or IdColon or '.' was expected");
                     }
-                } else {
-                    error("an Id or IdColon or '.' was expected");
                 }
                 break;
             case IN:
                 readExpr();
                 break;
+            case ID:
+                next(); // consome o 'ID'
+
+                // Pode ter ou nao '.'
+                if (lexer.token == Token.DOT) {
+                    next(); // consome o '.'
+
+                    if (lexer.token == Token.ID) {
+                        next(); // Consome o 'ID'
+                    } else if (lexer.token == Token.IDCOLON) {
+                        next(); // Consome o 'IDCOLON'
+                        exprList();
+                    } else {
+                        error("An Id or IdColon was expected after '.'");
+                    }
+                }
+                break;
             default:
-                error("expected 'In', 'super' or 'self'");
+                error("expected 'In', 'super', 'self' or 'id'");
         }
     }
 
     // exprList ::= Expression { ',' Expression }
     private void exprList() {
         expr();
+
+        // Enquanto encontrar ',' chama o expr()
         while (lexer.token == Token.COMMA){
+            next(); // Consome o ','
             expr();
         }
     }
 
     // readExpr ::= 'In' '.' [ 'readInt' | 'readString' ]
     private void readExpr() {
-        next(); // consome o 'In'
+        next(); // consome o 'In', verificou na chamada anterior
         check(Token.DOT, "a '.' was expected after 'In'");
-        next();
+        next(); // consome o '.'
         if (lexer.token == Token.READINT || lexer.token == Token.READSTRING){
             next();
         }
