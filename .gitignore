@@ -2,6 +2,7 @@
 .idea
 out
 projeto.iml
+output
 
 # Ignorando saida do compilador 'report.txt'
 report.txt
