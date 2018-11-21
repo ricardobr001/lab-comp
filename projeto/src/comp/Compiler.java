@@ -4,11 +4,7 @@ package comp;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 
-import ast.CianetoClass;
-import ast.LiteralInt;
-import ast.MetaobjectAnnotation;
-import ast.Program;
-import ast.Statement;
+import ast.*;
 import lexer.Lexer;
 import lexer.Token;
 
@@ -41,6 +37,7 @@ public class Compiler {
         ArrayList<MetaobjectAnnotation> metaobjectCallList = new ArrayList<>();
         ArrayList<CianetoClass> CianetoClassList = new ArrayList<>();
         Program program = new Program(CianetoClassList, metaobjectCallList, compilationErrorList);
+        symbolTable = new SymbolTable(); // Inicializando a SymbolTable
         boolean thereWasAnError = false;
 
         // Aqui comeca -- ({ annot } classDec { { annot } classDec })
@@ -170,9 +167,13 @@ public class Compiler {
 
     // classDec ::= [ 'open' ] 'class' id [ 'extends' id ] memberList
     private void classDec() {
+        CianetoClass cianetoClass = new CianetoClass();
+        boolean OPEN = false;
         if (lexer.token == Token.ID && lexer.getStringValue().equals("open")) {
-            // open class
+            OPEN = true;
         }
+
+        cianetoClass.setOpenClass(OPEN); // Setando se a classe eh open ou nao
 
         // Se nao encontrar a palavra 'class', lanca um erro
         if (lexer.token != Token.CLASS) {
@@ -189,6 +190,7 @@ public class Compiler {
         // TODO: adicionar a classe declarada na tabela (analise semantica)
         // Recuperando o ID da classe (nome da classe)
         String className = lexer.getStringValue();
+        cianetoClass.setName(className);
         next();
 
         // Se encontrar a palavra 'extends' apos o ID
@@ -202,10 +204,14 @@ public class Compiler {
 
             // Recuperando o ID da super classe
             String superclassName = lexer.getStringValue();
+            CianetoClass dad = symbolTable.returnClass(superclassName);
+            cianetoClass.setDad(dad);
             next();
         }
 
-        // Chamando memberList
+        // Atualizando a classe atual, ou seja, qual classe está sendo analizada no momento
+        // Após isso chama o memberList
+        ActualClass = cianetoClass;
         memberList();
 
         // Se nao encontrar a palavra 'end', lanca um erro
@@ -222,13 +228,13 @@ public class Compiler {
         // Enquanto houver um metodo
         while (true) {
             // Verifica se o metodo eh public, private, override, etc..
-            qualifier();
+            String q = qualifier();
 
             // Se nao encontrou nada no qualifier, pode ser uma variavel ou uma funcao ou nada
             if (lexer.token == Token.VAR) {
-                fieldDec();
+                fieldDec(q);
             } else if (lexer.token == Token.FUNC) {
-                methodDec();
+                methodDec(q);
             } else {
                 break;
             }
@@ -251,15 +257,15 @@ public class Compiler {
 
     // methodDec ::=    'func' IdColon FormalParamDec [ '->' Type ] '{' StatementList '}' |
     //                  'func' Id [ '->' Type ] '{' StatementList '}'
-    private void methodDec() {
+    private void methodDec(String q) {
         // TODO: Adicionar o Id encontrar na tabela hash (Semantica)
+        // q eh o qualifier!!
         next(); // Ja verificou se tinha 'func' na chamada anterior
 
         // Se for apenas ID, o metodo nao possui parametros
         if (lexer.token == Token.ID) {
             // unary method
             next();
-
         }
         // Se nao pode ser um metodo ('Identifier:') com parametros
         else if (lexer.token == Token.IDCOLON) {
@@ -783,10 +789,10 @@ public class Compiler {
     }
 
     // fieldDec ::= 'var' Type IdList ';'
-    private void fieldDec() {
+    private void fieldDec(String q) {
         // TODO: Adicionar o Id encontrar na tabela hash (Semantica)
         next(); // Ja verificou se tinha 'var' na chamada anterior
-        type(); // Verificado
+        String t = type(); // Verificado
 
         // Se nao encontrar um Id depois do tipo, lanca um erro
         if (lexer.token != Token.ID) {
@@ -794,6 +800,10 @@ public class Compiler {
         } else {
             // Enquanto existirem mais Id
             while (lexer.token == Token.ID) {
+                String id = lexer.getStringValue();
+
+                CianetoAttribute a = new CianetoAttribute(id, t, q); // id, type, qualifier
+                ActualClass.putAttribute(id, a);
                 next(); // Anda o token
 
                 // Ve se encontrou uma virgula
@@ -813,48 +823,53 @@ public class Compiler {
     }
 
     // type ::= BasicType | Id
-    private void type() {
+    private String type() {
         // BasicType ::= 'Int' | 'Boolean' | 'String'
         if (lexer.token == Token.INT || lexer.token == Token.BOOLEAN || lexer.token == Token.STRING) {
-            // TODO: Adicionar o tipo da variavel na tabela para analise semantica
             String idType = lexer.getStringValue();
             next();
+            return idType;
         } else if (lexer.token == Token.ID) {
+            String idType = lexer.getStringValue();
             // TODO: Verifica se o id existe (classe)
             next();
+            return idType;
         }
         // Lança um erro se não for ID nem um tipo basico
         else {
             this.error("A type was expected");
         }
 
+        return "";
     }
 
     // qualifier ::=    'private' | 'public' | 'override' | 'override' 'public' |
     //                  'final' | 'final' 'public' | 'final' 'override' |
     //                  'final' 'override' 'public'
-    private void qualifier() {
+    private String qualifier() {
+        String q = "";
         // Parte ja implementada pelo professor
         if (lexer.token == Token.PRIVATE) { // private
-            next();
+            next(); q = "private";
         } else if (lexer.token == Token.PUBLIC) { // public
-            next();
+            next(); q = "public";
         } else if (lexer.token == Token.OVERRIDE) { // override
-            next();
+            next(); q = "override";
             if (lexer.token == Token.PUBLIC) { // override public
-                next();
+                next(); q = "override public";
             }
         } else if (lexer.token == Token.FINAL) { // final
-            next();
+            next(); q = "final";
             if (lexer.token == Token.PUBLIC) { // final public
-                next();
+                next(); q = "final public";
             } else if (lexer.token == Token.OVERRIDE) { // final override
-                next();
+                next(); q = "final override";
                 if (lexer.token == Token.PUBLIC) { // final override public
-                    next();
+                    next(); return "final override public";
                 }
             }
         }
+        return q;
     }
 
     /**
@@ -890,7 +905,7 @@ public class Compiler {
 
         // the number value is stored in lexer.getToken().value as an object of
         // Integer.
-        // Method intValue returns that value as an value of type int.
+        // CianetoMethod intValue returns that value as an value of type int.
         int value = lexer.getNumberValue();
         lexer.nextToken();
         return new LiteralInt(value);
@@ -909,5 +924,6 @@ public class Compiler {
     private SymbolTable symbolTable;
     private Lexer lexer;
     private ErrorSignaller signalError;
+    private CianetoClass ActualClass;
 
 }

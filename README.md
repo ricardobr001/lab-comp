@@ -51,6 +51,8 @@ Necessário implementação por completo
 
 Para analisar se a expr é Boolean iremos ver se os tipos das variaveis são os mesmos e se possui `==` | `<` | `>` | `<=` | `>=` | `!=`
 
+Inserindo classes na tabela hash e seus atributos
+
 # Updates
 Classes em Cianeto são definidas como no exemplo abaixo
 
