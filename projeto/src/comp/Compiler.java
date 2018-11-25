@@ -366,13 +366,15 @@ public class Compiler {
                 breakStat();
                 break;
             case SEMICOLON:
-                next();
+                 next();
+                 checkSemiColon = false;
                 break;
             case REPEAT:
                 repeatStat();
                 break;
             case VAR:
                 localDec();
+                checkSemiColon = false; // ';' eh opcional
                 break;
             case ASSERT:
                 assertStat();
@@ -510,10 +512,11 @@ public class Compiler {
         check(Token.IDCOLON, "'print:' or 'println:' was expected after 'Out.'");
 
         String printName = lexer.getStringValue();
-        if (!printName.equals("print:") || !printName.equals("println:")) {
+        if (!printName.equals("print:") && !printName.equals("println:")) {
             this.error("'print:' or 'println:' was expected after 'Out.'");
         }
 
+        next();
         expr();
     }
 
