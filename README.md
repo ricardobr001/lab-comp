@@ -8,7 +8,7 @@ Fornecida no compilador base, aparentemente ok
 Parcialmente fornecida no compilador base
 
 ### Chamadas revisadas ou criadas
-Aparentemente implementada por completo
+Aparentemente implementada por completo, fazer testes e ver se a lógica está correta!!
 
 
 - [x] program
@@ -20,19 +20,19 @@ Aparentemente implementada por completo
 - [x] fieldDec
     - [x] type | BasicType | Id
 - [x] methodDec
-    - [x] formalParamDec `TODO analise semantica`
-        - [x] paramDec `TODO analise semantica`
+    - [x] formalParamDec
+        - [x] paramDec
     - [x] statementList
         - [x] statement
             - [x] localDec
-            - [x] repeatStat `?`
+            - [x] repeatStat
             - [x] breakStat
             - [x] returnStat
             - [x] whileStat
-            - [x] ifStat    `?`
-            - [x] writeStat `?`
-            - [x] assignExpr `TODO analise semantica`
-            - [x] expr `TODO Cabuloso`
+            - [x] ifStat   
+            - [x] writeStat
+            - [x] assignExpr
+            - [x] expr
                 - [x] relation
                 - [x] simpleExpr
                 - [x] sumSubExpr
@@ -41,7 +41,7 @@ Aparentemente implementada por completo
                     - [x] highOperator
                 - [x] signalFactor
                     - [x] signal
-                - [x] factor `TODO`
+                - [x] factor
                     - [x] primaryExpr
                         - [x] ExprList
 
@@ -52,6 +52,36 @@ Necessário implementação por completo
 Para analisar se a expr é Boolean iremos ver se os tipos das variaveis são os mesmos e se possui `==` | `<` | `>` | `<=` | `>=` | `!=`
 
 Inserindo classes na tabela hash e seus atributos
+
+- [x] classDec `Inserindo classe na symbolTable`
+- [x] memberList
+- [x] qualifier `Retorna o qualificador do metodo ou atributo`
+- [x] fieldDec `Salva na classe atual o atributo`
+- [x] methodDec `Salva na classe atual o metodo`
+    - [ ] formalParamDec
+        - [ ] paramDec
+    - [x] statementList
+        - [ ] statement `TODO!`
+            - [ ] localDec
+            - [ ] repeatStat
+            - [ ] breakStat
+            - [ ] returnStat
+            - [ ] whileStat
+            - [ ] ifStat   
+            - [ ] writeStat
+            - [ ] assignExpr
+            - [ ] expr
+                - [ ] relation
+                - [ ] simpleExpr
+                - [ ] sumSubExpr
+                    - [ ] lowOperator
+                - [ ] term
+                    - [ ] highOperator
+                - [ ] signalFactor
+                    - [ ] signal
+                - [ ] factor
+                    - [ ] primaryExpr
+                        - [ ] ExprList
 
 # Updates
 Classes em Cianeto são definidas como no exemplo abaixo

@@ -205,19 +205,28 @@ public class Compiler {
             // Recuperando o ID da super classe
             String superclassName = lexer.getStringValue();
             CianetoClass dad = symbolTable.returnClass(superclassName);
+
+            if (dad == null) {
+                error("Did not find class '" + dad.getName() + "', class '" + cianetoClass.getName() + "' cannot extends a closed class or not decleared class");
+            }
+
+            // Salvando a classe pai da classe atual
             cianetoClass.setDad(dad);
             next();
         }
 
         // Atualizando a classe atual, ou seja, qual classe está sendo analizada no momento
         // Após isso chama o memberList
-        ActualClass = cianetoClass;
+        actualClass = cianetoClass;
         memberList();
 
         // Se nao encontrar a palavra 'end', lanca um erro
         if (lexer.token != Token.END) {
             error("'end' expected");
         }
+
+        // A classe terminou de ser analisada
+        actualClass = null;
 
         next();
     }
@@ -262,19 +271,28 @@ public class Compiler {
         // q eh o qualifier!!
         next(); // Ja verificou se tinha 'func' na chamada anterior
 
+        String methodName = "";
+
         // Se for apenas ID, o metodo nao possui parametros
         if (lexer.token == Token.ID) {
-            // unary method
+            // Recuperando o nome do metodo
+            methodName = lexer.getStringValue();
             next();
         }
         // Se nao pode ser um metodo ('Identifier:') com parametros
         else if (lexer.token == Token.IDCOLON) {
+            // Recuperando o nome do metodo e removendo o ';'
+            methodName = lexer.getStringValue().replaceAll(";", "");
             next();
             formalParamDec();
             // keyword method. It has parameters
         } else {
             error("An identifier or identifer: was expected after 'func'");
         }
+
+        // Criando o objeto CianetoMethod e salvando como metodo atual
+        CianetoMethod method = new CianetoMethod(methodName, q);
+        actualMethod = method;
 
         // Se encontrar '->', o metodo retorna alguma coisa
         if (lexer.token == Token.MINUS_GT) {
@@ -295,6 +313,10 @@ public class Compiler {
         if (lexer.token != Token.RIGHTCURBRACKET) {
             error("'{' expected");
         }
+
+        // O metodo terminou de ser analisado e salvando o metodo na classe atual
+        actualMethod = null;
+        actualClass.putMethod(methodName, method);
 
         next();
     }
@@ -806,7 +828,7 @@ public class Compiler {
                 String id = lexer.getStringValue();
 
                 CianetoAttribute a = new CianetoAttribute(id, t, q); // id, type, qualifier
-                ActualClass.putAttribute(id, a);
+                actualClass.putAttribute(id, a);
                 next(); // Anda o token
 
                 // Ve se encontrou uma virgula
@@ -927,6 +949,7 @@ public class Compiler {
     private SymbolTable symbolTable;
     private Lexer lexer;
     private ErrorSignaller signalError;
-    private CianetoClass ActualClass;
+    private CianetoClass actualClass;
+    private CianetoMethod actualMethod;
 
 }

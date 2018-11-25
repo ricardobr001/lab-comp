@@ -1,10 +1,18 @@
 package ast;
 
+import java.util.Hashtable;
+
 public class CianetoMethod {
     private String name;
     private String qualifier;
+    private Hashtable<String, Object> parameters;
+    private Hashtable<String, Object> localVariables;
 
-    public CianetoMethod() { }
+    public CianetoMethod(String name, String qualifier) {
+        this.name = name;
+        this.qualifier = qualifier;
+        this.parameters = new Hashtable<String, Object>();
+    }
 
     public String getName() {
         return name;
@@ -20,5 +28,21 @@ public class CianetoMethod {
 
     public void setQualifier(String qualifier) {
         this.qualifier = qualifier;
+    }
+
+    public CianetoAttribute getParameter(String key) {
+        return (CianetoAttribute) this.parameters.get(key);
+    }
+
+    public void putMethod(String key, Object value) {
+        this.parameters.put(key, value);
+    }
+
+    public CianetoAttribute getLocal(String key) {
+        return (CianetoAttribute) this.localVariables.get(key);
+    }
+
+    public void putVariable(String key, Object value) {
+        this.localVariables.put(key, value);
     }
 }
