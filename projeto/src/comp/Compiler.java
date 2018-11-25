@@ -227,6 +227,7 @@ public class Compiler {
 
         // A classe terminou de ser analisada
         actualClass = null;
+        symbolTable.putClass(className, cianetoClass);
 
         next();
     }
