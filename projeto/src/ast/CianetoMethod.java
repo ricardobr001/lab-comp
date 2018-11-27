@@ -34,7 +34,7 @@ public class CianetoMethod {
         return (CianetoAttribute) this.parameters.get(key);
     }
 
-    public void putMethod(String key, Object value) {
+    public void putParameter(String key, Object value) {
         this.parameters.put(key, value);
     }
 

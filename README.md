@@ -58,8 +58,8 @@ Inserindo classes na tabela hash e seus atributos
 - [x] qualifier `Retorna o qualificador do metodo ou atributo`
 - [x] fieldDec `Salva na classe atual o atributo`
 - [x] methodDec `Salva na classe atual o metodo`
-    - [ ] formalParamDec
-        - [ ] paramDec
+    - [x] formalParamDec `Chama paramDec`
+        - [x] paramDec `Salvando no metodo atual a lista de parametros`
     - [x] statementList
         - [ ] statement `TODO!`
             - [ ] localDec

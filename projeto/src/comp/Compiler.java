@@ -187,7 +187,6 @@ public class Compiler {
             error("Identifier expected");
         }
 
-        // TODO: adicionar a classe declarada na tabela (analise semantica)
         // Recuperando o ID da classe (nome da classe)
         String className = lexer.getStringValue();
         cianetoClass.setName(className);
@@ -273,27 +272,35 @@ public class Compiler {
         next(); // Ja verificou se tinha 'func' na chamada anterior
 
         String methodName = "";
+        CianetoMethod method = new CianetoMethod("", "");
 
         // Se for apenas ID, o metodo nao possui parametros
         if (lexer.token == Token.ID) {
             // Recuperando o nome do metodo
             methodName = lexer.getStringValue();
+
+            // Setando o nome do metodo e seu qualificador, alem de coloca-lo como metodo atual
+            method.setName(methodName);
+            method.setQualifier(q);
+            actualMethod = method;
+
             next();
         }
         // Se nao pode ser um metodo ('Identifier:') com parametros
         else if (lexer.token == Token.IDCOLON) {
             // Recuperando o nome do metodo e removendo o ';'
             methodName = lexer.getStringValue().replaceAll(";", "");
+
+            // Setando o nome do metodo e seu qualificador, alem de coloca-lo como metodo atual
+            method.setName(methodName);
+            method.setQualifier(q);
+            actualMethod = method;
+
             next();
             formalParamDec();
-            // keyword method. It has parameters
         } else {
             error("An identifier or identifer: was expected after 'func'");
         }
-
-        // Criando o objeto CianetoMethod e salvando como metodo atual
-        CianetoMethod method = new CianetoMethod(methodName, q);
-        actualMethod = method;
 
         // Se encontrar '->', o metodo retorna alguma coisa
         if (lexer.token == Token.MINUS_GT) {
@@ -337,12 +344,17 @@ public class Compiler {
     // paramDec ::= Type Id
     private void paramDec() {
         // TODO: Adicionar na tabela para analise semantica (o tipo do id)
-        type();
+        String type = type();
 
         // Se nao encontrar um identificador apos o tipo de uma variavel, lanca um erro
         if (lexer.token != Token.ID) {
             error("A variable name was expected");
         }
+
+        // Recuperando o nome da variavel, criando o objeto que será salvo no parametro do metdodo atual
+        String variableName = lexer.getStringValue();
+        CianetoAttribute variable = new CianetoAttribute(variableName, type, "");
+        actualMethod.putParameter(variableName, variable);
 
         next(); // Consome o id
     }
