@@ -1,0 +1,16 @@
+/*
+Iago Freitas Piedade
+iagopiedade@hotmail.com
+*/
+@cep(5, "Classe 'A' não existe", 
+  "Class 'A' was not found", 
+  "comp.Compiler.factor()")
+
+class Program
+
+    func run() {  
+        if A.new == null
+            Out.print: 0;
+    }
+
+end

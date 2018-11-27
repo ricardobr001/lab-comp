@@ -1,0 +1,11 @@
+Isabela Sayuri Matsumoto - 726539 isabelasassa@hotmail.com
+@cep(5,"Falta 'In.' depois de 'read'", "'In.' expected after 'read' command", "comp.Compiler.readStatement()")
+
+class Program {
+  
+    func run{
+        a = readInt;
+                
+    }
+
+end

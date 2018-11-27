@@ -1,0 +1,23 @@
+/* 
+William A Alves
+willianadrianoalves@hotmail.com
+*/
+
+class Program {
+   
+    func run {
+        
+        var Int num = In.readInt;
+
+        if num < 15 { 
+            Out.println: "pequeno"; 
+        } 
+        else {
+            Out.println: "grande";
+        }
+        assert num < 1000, "Numero bem grande"
+        assert num > 0, "Numero negativo"
+         
+   }   
+
+end

@@ -1,0 +1,90 @@
+/*
+    Vinícius Furukawa Carvalho
+    email: vinicius_furuka@hotmail.com.br
+*/
+
+@nce
+
+/*
+  @filename   ok-queue.ci
+
+  @comment    Cria uma fila e imprime
+
+*/
+
+class Node
+    var Int number;
+    var Node next;
+    
+    func print {
+        Out.print:number++" ";
+        if next != nil{
+            next.print;
+        }
+    }
+end
+
+class Head
+    var Node end;
+    var Node first;
+    var Int nElements;
+    
+    func init{
+        end = nil;
+        first = nil;
+        nElements = 0;
+    }
+    
+    func print {
+        if nElements != 0 {
+            first.print;
+        }
+    }
+    
+    func insert:Int num{
+        nElements = nElements + 1;
+        var Node aux;
+        
+        aux = Node.new;
+            
+        aux.number = num;
+        aux.next = nil;
+        
+        if first == nil && end == nil{
+            first = aux;
+        } else {
+            end.next = aux;
+        }
+        
+        end = aux;
+    }
+    
+    func print:
+end
+
+class Program
+   
+   func run {
+      var Head head;
+      var Int max;
+      var Int aux;
+      
+      count = 0;
+      max = 10;
+      
+      Out.println:"";
+      Out.println:"Ok-queue";
+      Out.println:"The output should be :";
+      Out.println:"The values of queue";
+      head = Head.new;
+      head.init;
+      
+      while head.nElements < max {
+          aux = In.readInt;
+          head.insert:aux;
+      }
+      
+      head.print;
+   }   
+
+end

@@ -1,0 +1,23 @@
+/*
+    Breno V. V. de Oliveira
+    breno.oliveira@dcomp.sor.ufscar.br
+*/
+@cep(7, "Expressao do while deve ser booleana", 
+  "non-boolean expression in 'while' command",
+   "comp.Compiler.whileStatement()")
+
+
+class Program
+   
+    func run {
+    
+        while  0{      
+            write 0{
+
+            }
+        }
+    }   
+
+end
+
+

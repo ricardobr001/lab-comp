@@ -1,0 +1,20 @@
+/*
+    Breno V. V. de Oliveira
+    breno.oliveira@dcomp.sor.ufscar.br
+*/
+@cep(8, "Uso de operadores logicos com inteiros", 
+   "type 'int' does not support operator '&&'",  "comp.Compiler.term()")
+  
+
+class Program 
+   
+    func run {
+        var Int i;
+      
+        i = (3 && 4) || 5;      
+        Out.println: i;
+    }   
+
+end
+
+

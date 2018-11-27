@@ -1,0 +1,17 @@
+/*
+Michael dos Santos
+michael-santos@outlook.com.br
+*/
+
+@nce
+
+/*
+    @filename    ok-lex04.kra
+    @comment    Testa limites validos de numeros inteiros
+    */
+
+class Program
+    func run {
+        Out.print: 0, 1, 32766, 32767, -32767, -0;
+    }
+end

@@ -1,0 +1,20 @@
+/*
+Giovanna Blasco Martin
+giovanna.blasco@hotmail.com
+*/
+
+@cep(8, "chamada a método não existente", "Method 'p' was not found in class 'Program' or its superclasses", "comp.Compiler.factor()")
+
+class Program
+    
+    func t { 
+    }
+    
+    func m {  
+        self.p;
+    }
+  
+    func run {
+    }
+
+end

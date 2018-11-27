@@ -1,0 +1,22 @@
+/* -----------------------
+ * Carlos Tadeu C. S
+ * tadeucarlos07@gmail.com
+ * ----------------------- */
+
+@cep(5, "classe 'A' herda de si mesma", 
+	"Class 'A' is inheriting from itself",
+	"comp.Compiler.classDec()")
+  
+
+class A extends A {
+}
+end
+
+class Program {
+   
+	func run() {
+	}   
+
+}
+end
+

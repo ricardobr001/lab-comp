@@ -1,0 +1,49 @@
+@nce
+
+/*
+Matheus da Silva Jesus - 620025
+matheus.jesus@dcomp.sor.ufscar.br
+*/
+
+/*
+  @filename   ok-ger08.ci
+
+  @comment    Testa se a passagem de parametros e a chamada de metodos
+  estao corretas.
+  Deve escrever
+    1 1 2 2 3 3
+
+  */
+
+class A
+    func m1: Int n {
+        Out.print: 1;
+        Out.print: n;
+    }   
+   
+    func m2: Int n {
+        Out.print: 2;
+        Out.print: n;
+    }   
+   
+    func m3: Int n {
+        Out.print: 3;
+        Out.print: n;
+    }   
+end
+
+
+class Program
+    func run {
+        var A a;
+
+        Out.println: "";
+        Out.println: "Ok-ger08";
+        Out.println: "The output should be :";
+        Out.println: "1 1 2 2 3 3";
+        a = A.new;
+        a.m1: 1;
+        a.m2: 2;
+        a.m3: 3;
+    }
+end

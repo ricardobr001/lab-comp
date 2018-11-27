@@ -1,0 +1,22 @@
+/*
+    Nathan Eloy
+    nathaneloy@hotmail.com
+*/
+
+@nce
+
+class
+/*
+    @filename   ok-lex07.ci
+
+
+    @comment    Testa se o lexico conseguira encontrar uma palavra chave se ela
+    comecar no primeiro carater do arquivo
+*/
+
+Program
+
+    func run {
+    }
+
+end
