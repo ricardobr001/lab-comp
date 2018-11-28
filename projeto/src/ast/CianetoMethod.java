@@ -5,6 +5,7 @@ import java.util.Hashtable;
 public class CianetoMethod {
     private String name;
     private String qualifier;
+    private String type;
     private Hashtable<String, Object> parameters;
     private Hashtable<String, Object> localVariables;
 
@@ -29,6 +30,10 @@ public class CianetoMethod {
     public void setQualifier(String qualifier) {
         this.qualifier = qualifier;
     }
+
+    public void setType(String type) { this.type = type; }
+
+    public String getType() { return type; }
 
     public CianetoAttribute getParameter(String key) {
         return (CianetoAttribute) this.parameters.get(key);

@@ -61,15 +61,15 @@ Inserindo classes na tabela hash e seus atributos
     - [x] formalParamDec `Chama paramDec`
         - [x] paramDec `Salvando no metodo atual a lista de parametros`
     - [x] statementList
-        - [ ] statement `TODO!`
-            - [ ] localDec
-            - [ ] repeatStat
-            - [ ] breakStat
-            - [ ] returnStat
-            - [ ] whileStat
-            - [ ] ifStat   
-            - [ ] writeStat
-            - [ ] assignExpr
+        - [ ] statement `TODO!` 
+            - [x] localDec `Salvando atributos no metodo atual e verificações`
+            - [x] repeatStat `Verifica se expressao é boolean`
+            - [x] breakStat
+            - [x] returnStat `Verifica se retorno é do mesmo tipo que o retorno do metodo`
+            - [x] whileStat `Verifica se expressao é boolean`
+            - [x] ifStat `Verifica se expressao é boolean`
+            - [x] writeStat `Aparentemente não precisa de verificação (?)`
+            - [x] assignExpr `Verifica se as expressoes são do mesmo tipo`
             - [ ] expr
                 - [ ] relation
                 - [ ] simpleExpr

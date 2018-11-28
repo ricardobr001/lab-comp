@@ -5,6 +5,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 
 import ast.*;
+import jdk.nashorn.internal.codegen.types.BooleanType;
 import lexer.Lexer;
 import lexer.Token;
 
@@ -268,6 +269,8 @@ public class Compiler {
     //                  'func' Id [ '->' Type ] '{' StatementList '}'
     private void methodDec(String q) {
         // TODO: Adicionar o Id encontrar na tabela hash (Semantica)
+        // TODO: Verificar se existem metodos iguais
+        // TODO: Verificar se existe metodo override na classe pai
         // q eh o qualifier!!
         next(); // Ja verificou se tinha 'func' na chamada anterior
 
@@ -306,7 +309,8 @@ public class Compiler {
         if (lexer.token == Token.MINUS_GT) {
             // method declared a return type
             next();
-            type();
+            String t = type();
+            actualMethod.setType(t);
         }
 
         // Verifica se o token eh diferente '{'
@@ -434,13 +438,19 @@ public class Compiler {
 
     // localDec ::= 'var' Type IdList [ '=' Expression ] [';']
     private void localDec() {
-        // TODO: verificar se a variavel local ja foi declarada no escopo
-        // TODO: verificar se a atribuicao eh para apenas uma variavel
-        // TODO: verificar se o retorno eh compativel para a variavel
+        int countIdList = 0;
         next(); // le token 'var'
-        type();
+        String t = type();
         check(Token.ID, "A variable name was expected");
         while (lexer.token == Token.ID) {
+            countIdList++; // contar numero de variaveis sendo declaradas
+            String id = lexer.getStringValue();
+            CianetoAttribute c = new CianetoAttribute(id, t, null);
+            if (actualMethod.getLocal(id) != null){ // verifica se variavel local já existe
+                actualMethod.putVariable(id, c);
+            }else{
+                error("variable already declared");
+            }
             next();
             if (lexer.token == Token.COMMA) {
                 next();
@@ -450,9 +460,15 @@ public class Compiler {
         }
 
         if (lexer.token == Token.ASSIGN) {
+            if (countIdList > 1){ // verificar se existe mais de uma variavel sendo atribuida
+                error("More than one variable assigned");
+            }
             next();
             // check if there is just one variable
-            expr();
+            Expr e = expr();
+            if (!e.getType().getName().equals(t)){ // verificar se os tipos são compativeis
+                error("return of expression not compatible");
+            }
         }
 
         // ';' eh opcional
@@ -464,7 +480,6 @@ public class Compiler {
 
     // repeatStat ::= 'repeat' StatementList 'until' Expression
     private void repeatStat() {
-        // TODO: Verificar se expr é Boolean
         next(); // le token 'repeat'
 
         // Anotações do professor
@@ -477,7 +492,10 @@ public class Compiler {
         check(Token.UNTIL, "'until' was expected");
         next(); // le token 'until'
 
-        expr();
+        Expr e = expr();
+        if (!e.getType().getName().equals("boolean")){ // verificar se a expressao e boolean
+            error("expression must be boolean");
+        }
     }
 
     // breakStat ::= 'break'
@@ -488,14 +506,20 @@ public class Compiler {
     // returnStat ::= 'return' Expression
     private void returnStat() {
         next(); // le o token 'return'
-        expr();
+        Expr e = expr();
+        if (!e.getType().getName().equals(actualMethod.getType())){ // verifica se o retorno do metodo e do mesmo tipo da expressao
+            error("expression not compatible to method return");
+        }
     }
 
     // whileStat ::= 'while' Expression '{' StatementList '}'
     private void whileStat() {
-        // TODO: Verificar se expr é Boolean
         next(); // le o token 'while'
-        expr();
+        Expr e = expr();
+
+        if (!e.getType().getName().equals("boolean")){ // verifica se expressao e boolean
+            error("expression must be boolean");
+        }
 
         check(Token.LEFTCURBRACKET, "'{' expected after the 'while' expression");
         next();
@@ -512,9 +536,12 @@ public class Compiler {
 
     //ifStat ::= 'if' Expression '{' Statement '}' [ 'else' '{' Statement '}' ]
     private void ifStat() {
-        // TODO: Verificar se expr é Boolean
         next(); // le o token 'if'
-        expr();
+        Expr e = expr();
+
+        if (!e.getType().getName().equals("boolean")){ // verifica se expressao e boolean
+            error("expression must be boolean");
+        }
 
         check(Token.LEFTCURBRACKET, "'{' expected after the 'if' expression");
         next();
@@ -557,18 +584,23 @@ public class Compiler {
 
     // assignExpr ::= Expression [ '=' Expression ]
     private void assignExpr() {
-        // TODO: Ver se a atribuicao eh valida (int recebe int) (float recebe float) etc...
-        expr();
+        Expr first = expr();
 
         // Se encontrar um '='
         if (lexer.token == Token.ASSIGN) {
             next(); // Le o token '='
-            expr();
+            Expr second = expr();
+
+            if (!first.getType().getName().equals(second.getType().getCname())){ // verifica se atribuição é do mesmo tipo
+                error("Incompatible types");
+            }
         }
     }
 
     // expr ::= SimpleExpression [ Relation SimpleExpression ]
-    private void expr() {
+    private Expr expr() {
+        // TODO: Verificar se as expressoes são do mesmo tipo
+        // TODO: Vericar se faz sentido ter a comparação entre as expressoes. Ex.: true > false
         simpleExpr();
 
         // Se for uma expressao de relacao '==' | '<' | '>' | '<=' ...
@@ -576,6 +608,8 @@ public class Compiler {
             next();
             simpleExpr();
         }
+
+        return new NullExpr(); // somente para não dar erro
     }
 
     // Relation ::= '==' | '<' | '>' | '<=' | '>=' | '!='
