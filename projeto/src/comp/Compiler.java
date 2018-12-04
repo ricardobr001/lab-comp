@@ -3,6 +3,9 @@ package comp;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.Set;
 
 import ast.*;
 import jdk.nashorn.internal.codegen.types.BooleanType;
@@ -773,21 +776,44 @@ public class Compiler {
     private void primaryExpr() {
         switch (lexer.token){
             case SUPER:
-                // TODO: Verificar se a classe PAI possui o metodo ou atributo
+                // TODO: Ver se é possivel acessar as variaveis globais da classe pai
                 next(); // consome "super"
                 check(Token.DOT, "a '.' was expected after 'super'");
                 next(); // consome "."
                 if (lexer.token == Token.ID){
+                    String method = lexer.getStringValue();
+                    if (actualClass.getDad().getMethod(method) == null){ // verifica se a classe pai tem o metodo
+                        error("Super class haven't this method");
+                    }
                     next(); // consome o ID
                 } else if (lexer.token == Token.IDCOLON){
+                    String method = lexer.getStringValue();
+                    if (actualClass.getDad().getMethod(method) == null){ // verifica se a classe pai tem o metodo
+                        error("Super class haven't this method");
+                    }
                     next(); // consome o ID colon
-                    exprList();
+
+                    List<Expr> e = exprList(); // lista de paramentros
+                    Hashtable<String, Object> params = actualClass.getDad().getMethod(method).getParameter(); // lista de paramentros salva no metodo
+
+                    if (e.size() != params.size()){ // verifica se tem a mesma quantidade de parametros
+                        error("expected a different number of parameters");
+                    }
+
+                    Set<String> keyParams = params.keySet();
+                    int i = 0;
+                    for (String key: keyParams){ // verifica se tem o mesmo tipo
+                        CianetoAttribute c = (CianetoAttribute) params.get(key);
+                        if (c.getType() != e.get(i).getType().getName()){
+                            error("incompatible types in parameters");
+                        }
+                    }
+
                 } else {
                     error("an Id or IdColon was expected");
                 }
                 break;
             case SELF:
-                // TODO: Verificar se a classe ATUAL possui o metodo ou atributo
                 next(); // consome "self"
 
                 // Pode ter ou nao '.'
@@ -795,29 +821,102 @@ public class Compiler {
                     next(); // Consome o '.'
 
                     if (lexer.token == Token.ID){
+                        String value = lexer.getStringValue();
+                        // verifica se existe algum metodo ou atributo nessa classe
+                        if (actualClass.getAttribute(value) == null && actualClass.getMethod(value) == null){
+                            error("method or attribute not found");
+                        }
+
+                        if (lexer.token == Token.DOT){
+                            next(); // consome '.'
+                            if (lexer.token == Token.ID){
+
+                                String s = lexer.getStringValue();
+
+                                if (actualClass.getAttribute(value) != null){ // verifica se existe um metodo ou atributo na classe
+                                    if (symbolTable.returnClass(actualClass.getAttribute(value).getType()).getMethod(s) == null){
+                                        error("method not found");
+                                    }
+                                    if (symbolTable.returnClass(actualClass.getAttribute(value).getType()).getAttribute(s) == null){
+                                        error("attribute not found");
+                                    }
+                                }else if (actualClass.getMethod(value) != null){ // verifica se existe um medoto ou atributo na classe do retorno do metodo
+                                    if (symbolTable.returnClass(actualClass.getMethod(value).getType()).getMethod(s) == null){
+                                        error("method not found");
+                                    }
+                                    if (symbolTable.returnClass(actualClass.getMethod(value).getType()).getAttribute(s) == null){
+                                        error("attribute not found");
+                                    }
+                                }
+
+                                next(); // consome o ID
+                            } else if (lexer.token == Token.IDCOLON){
+                                String method = lexer.getStringValue();
+                                CianetoMethod current = null;
+
+                                if (actualClass.getAttribute(value) != null){ // verifica se existe um metodo ou atributo na classe
+                                    if (symbolTable.returnClass(actualClass.getAttribute(value).getType()).getMethod(method) == null){
+                                        error("method not found");
+                                    }
+                                    current = symbolTable.returnClass(actualClass.getAttribute(value).getType()).getMethod(method);
+                                }else if (actualClass.getMethod(value) != null){ // verifica se existe um medoto ou atributo na classe do retorno do metodo
+                                    if (symbolTable.returnClass(actualClass.getMethod(value).getType()).getMethod(method) == null){
+                                        error("method not found");
+                                    }
+                                    current = symbolTable.returnClass(actualClass.getMethod(value).getType()).getMethod(method);
+                                }
+
+                                next(); // consome o ID colon
+
+                                List<Expr> e = exprList(); // lista de paramentros
+                                Hashtable<String, Object> params = current.getParameter(); // lista de paramentros salva no metodo
+
+                                if (e.size() != params.size()){ // verifica se tem a mesma quantidade de parametros
+                                    error("expected a different number of parameters");
+                                }
+
+                                Set<String> keyParams = params.keySet();
+                                int i = 0;
+                                for (String key: keyParams){ // verifica se tem o mesmo tipo
+                                    CianetoAttribute c = (CianetoAttribute) params.get(key);
+                                    if (c.getType() != e.get(i).getType().getName()){
+                                        error("incompatible types in parameters");
+                                    }
+                                }
+                            } else {
+                                error("an Id or IdColon was expected");
+                            }
+                        }
+
                         next(); // consome o ID
                     } else if (lexer.token == Token.IDCOLON) {
+                        String method = lexer.getStringValue();
                         next(); // consome o ID colon
-                        exprList();
-                    }else if (lexer.token == Token.DOT){
-                        next();
-                        if (lexer.token == Token.ID){
-                            next(); // consome o ID
-                        } else if (lexer.token == Token.IDCOLON){
-                            next(); // consome o ID colon
-                            exprList();
-                        } else {
-                            error("an Id or IdColon was expected");
+
+                        List<Expr> e = exprList(); // lista de paramentros
+                        Hashtable<String, Object> params = actualClass.getMethod(method).getParameter(); // lista de paramentros salva no metodo
+
+                        if (e.size() != params.size()){ // verifica se tem a mesma quantidade de parametros
+                            error("expected a different number of parameters");
                         }
-                    } else {
-                        error("an Id or IdColon or '.' was expected");
+
+                        Set<String> keyParams = params.keySet();
+                        int i = 0;
+                        for (String key: keyParams){ // verifica se tem o mesmo tipo
+                            CianetoAttribute c = (CianetoAttribute) params.get(key);
+                            if (c.getType() != e.get(i).getType().getName()){
+                                error("incompatible types in parameters");
+                            }
+                        }
+                    }else {
+                        error("an Id or IdColon was expected");
                     }
                 }
                 break;
-            case IN:
+            case IN: // TODO
                 readExpr();
                 break;
-            case ID:
+            case ID: // TODO
                 next(); // consome o 'ID'
 
                 // Pode ter ou nao '.'
@@ -840,7 +939,7 @@ public class Compiler {
     }
 
     // exprList ::= Expression { ',' Expression }
-    private void exprList() {
+    private List<Expr> exprList() {
         expr();
 
         // Enquanto encontrar ',' chama o expr()
@@ -848,6 +947,8 @@ public class Compiler {
             next(); // Consome o ','
             expr();
         }
+
+        return new ArrayList<>(); // só pra nao dar erro
     }
 
     // readExpr ::= 'In' '.' [ 'readInt' | 'readString' ]

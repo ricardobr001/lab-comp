@@ -13,6 +13,7 @@ public class CianetoMethod {
         this.name = name;
         this.qualifier = qualifier;
         this.parameters = new Hashtable<String, Object>();
+        this.localVariables = new Hashtable<String, Object>();
     }
 
     public String getName() {
@@ -35,9 +36,11 @@ public class CianetoMethod {
 
     public String getType() { return type; }
 
-    public CianetoAttribute getParameter(String key) {
+    public CianetoAttribute getParameterById(String key) {
         return (CianetoAttribute) this.parameters.get(key);
     }
+
+    public Hashtable<String, Object> getParameter(){ return this.parameters; }
 
     public void putParameter(String key, Object value) {
         this.parameters.put(key, value);
