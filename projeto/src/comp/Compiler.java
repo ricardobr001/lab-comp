@@ -748,7 +748,7 @@ public class Compiler {
                         }
                     }
                 } else {
-                    primaryExpr();
+                    Expr e = primaryExpr();
                 }
         }
     }
@@ -775,21 +775,35 @@ public class Compiler {
     //                  'self' '.' Id '.' IdColon ExpressionList | 'self' '.' Id '.' Id |     PODE COMECAR COM SELF
     //                  ReadExpr        OU PODE SER READEXPR
     private Expr primaryExpr() {
+//        Expr expression = null;
+        String auxType = "";
         switch (lexer.token){
             case SUPER:
                 // TODO: Ver se é possivel acessar as variaveis globais da classe pai
                 next(); // consome "super"
                 check(Token.DOT, "a '.' was expected after 'super'");
                 next(); // consome "."
+
                 if (lexer.token == Token.ID){
+                    // TODO: Verificar também se eh um attr
+                    /*
+                     * class FOO
+                     *      var Int a;  // OK
+                     *      var Int b   // OK
+                     * end
+                     */
                     String method = lexer.getStringValue();
                     if (actualClass.getDad().getMethod(method) == null){ // verifica se a classe pai tem o metodo
                         error("Super class haven't this method");
                     }else{
                         if(actualClass.getDad().getMethod(method).getQualifier().equals("private")){
                             error("cannot access this method");
+                            // TODO: verificar a classe pai da pai se tem o attr ou metodo chamado
                         }
                     }
+
+                    // Recuperando o tipo do método chamado da classe pai
+                    auxType = actualClass.getDad().getMethod(method).getType();
                     next(); // consome o ID
                 } else if (lexer.token == Token.IDCOLON){
                     String method = lexer.getStringValue();
@@ -800,12 +814,15 @@ public class Compiler {
                             error("cannot access this method");
                         }
                     }
+
+                    auxType = actualClass.getDad().getMethod(method).getType();
+
                     next(); // consome o ID colon
 
                     List<Expr> e = exprList(); // lista de paramentros
                     Hashtable<String, Object> params = actualClass.getDad().getMethod(method).getParameter(); // lista de paramentros salva no metodo
 
-                    if (e.size() != params.size()){ // verifica se tem a mesma quantidade de parametros
+                    if (e.size() != params.size()) { // verifica se tem a mesma quantidade de parametros
                         error("expected a different number of parameters");
                     }
 
@@ -821,6 +838,7 @@ public class Compiler {
                 } else {
                     error("an Id or IdColon was expected");
                 }
+//                expression = new Expr(auxType);
                 break;
             case SELF:
                 next(); // consome "self"
@@ -834,6 +852,13 @@ public class Compiler {
                         // verifica se existe algum metodo ou atributo nessa classe
                         if (actualClass.getAttribute(value) == null && actualClass.getMethod(value) == null){
                             error("method or attribute not found");
+                        }
+
+                        // Recuperando o tipo do metodo ou attr
+                        if (actualClass.getAttribute(value) == null) {
+                            auxType = actualClass.getMethod(value).getType();
+                        } else {
+                            auxType = actualClass.getAttribute(value).getType();
                         }
 
                         if (lexer.token == Token.DOT){
@@ -856,6 +881,13 @@ public class Compiler {
                                         }
                                         if (!exists){
                                             error("method or attribute not found");
+                                        } else {
+                                            // Recuperando o tipo dometodo ou attr da classe pai
+                                            if (dad.getMethod(s) == null) {
+                                                auxType = dad.getAttribute(s).getType();
+                                            } else {
+                                                auxType = dad.getMethod(s).getType();
+                                            }
                                         }
                                     }
                                 }else if (actualClass.getMethod(value) != null){ // verifica se existe um medoto ou atributo na classe do retorno do metodo
@@ -872,6 +904,14 @@ public class Compiler {
                                         }
                                         if (!exists){
                                             error("method or attribute not found");
+                                        }
+                                        else {
+                                            // Recuperando o tipo dometodo ou attr da classe pai
+                                            if (dad.getMethod(s) == null) {
+                                                auxType = dad.getAttribute(s).getType();
+                                            } else {
+                                                auxType = dad.getMethod(s).getType();
+                                            }
                                         }
                                     }
                                 }
@@ -898,7 +938,7 @@ public class Compiler {
                                 List<Expr> e = exprList(); // lista de paramentros
                                 Hashtable<String, Object> params = current.getParameter(); // lista de paramentros salva no metodo
 
-                                if (e.size() != params.size()){ // verifica se tem a mesma quantidade de parametros
+                                if (e.size() != params.size()) { // verifica se tem a mesma quantidade de parametros
                                     error("expected a different number of parameters");
                                 }
 
@@ -910,6 +950,9 @@ public class Compiler {
                                         error("incompatible types in parameters");
                                     }
                                 }
+
+                                // Recuperando o tipo a lista de expr
+                                auxType = e.get(0).getType();
                             } else {
                                 error("an Id or IdColon was expected");
                             }
@@ -935,6 +978,9 @@ public class Compiler {
                                 error("incompatible types in parameters");
                             }
                         }
+
+                        // Recuperando o tipo a lista de expr
+                        auxType = e.get(0).getType();
                     }else {
                         error("an Id or IdColon was expected");
                     }
@@ -963,6 +1009,8 @@ public class Compiler {
             default:
                 error("expected 'In', 'super', 'self' or 'id'");
         }
+
+        return new Expr(auxType);
     }
 
     // exprList ::= Expression { ',' Expression }
