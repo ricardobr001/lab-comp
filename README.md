@@ -80,8 +80,8 @@ Inserindo classes na tabela hash e seus atributos
                 - [ ] signalFactor
                     - [ ] signal
                 - [ ] factor
-                    - [ ] primaryExpr
-                        - [ ] ExprList
+                    - [ ] primaryExpr `Feito os tratamentos do self e super`
+                        - [ ] ExprList `Retornará uma Lista de Expr para verificar se os parametros estao certos`
 
 # Updates
 Classes em Cianeto são definidas como no exemplo abaixo
