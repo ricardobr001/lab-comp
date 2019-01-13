@@ -1,7 +1,17 @@
 package ast;
 
-abstract public class Expr {
-    abstract public void genC( PW pw, boolean putParenthesis );
-      // new method: the type of the expression
-    abstract public Type getType();
+public class Expr {
+
+    private String type;
+    public Expr(final String type){
+        this.type = type;
+    }
+
+    public String getType(){
+        return this.type;
+    }
+
+    public void setType(final String type){
+        this.type = type;
+    }
 }
