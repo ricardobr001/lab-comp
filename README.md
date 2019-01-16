@@ -103,3 +103,17 @@ class Foo
     var Int foo  // Ok
 end
 ```
+
+# Testes Lexicos 
+OK-LEX02 - Success
+OK-LEX03 - Success
+OK-LEX04 - gramatica errada (?)
+OK-LEX05 - Number out of limits
+OK-LEX06 - { } (?)
+OK-LEX08 - Success
+OK-LEX10 - Success
+ok-math - Erro no Comp
+ok-queue - Erro no Comp
+OK-SEM03 - Success
+OK-SEM04 - Success
+
