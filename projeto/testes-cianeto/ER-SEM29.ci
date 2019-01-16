@@ -1,0 +1,37 @@
+/* -----------------------
+ * Carlos Tadeu C. S
+ * tadeucarlos07@gmail.com
+ * ----------------------- */
+
+@cep(15, "'Método 'put' redefinido na classe 'B' com parâmetros diferentes daqueles da superclasse 'A'", 
+  "Method 'put' of the subclass 'B' has a signature different from the same method of superclass 'A',
+  "comp.Compiler.methodDec() or comp.Compiler.classDec()")
+
+
+class A 
+    
+    func put {
+    }   
+
+end
+
+
+class B extends A 
+   
+    func put: Int x {
+    }   
+end
+
+
+class Program 
+   
+    func run {
+        var A a;
+      
+        a = A.new;
+        a.put;
+    }   
+
+end
+
+

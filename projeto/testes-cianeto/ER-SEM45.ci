@@ -1,0 +1,13 @@
+@cep(8, "Não se pode atribuir objetos a métodos ")
+
+class A end
+
+
+class Program 
+   
+    public func run {
+        run = nil;
+    }   
+
+end
+

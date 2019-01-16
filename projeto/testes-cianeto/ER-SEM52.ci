@@ -1,0 +1,17 @@
+@cep(9, "An overridden method should be preceded by 'override'")
+
+open 
+class A
+    public func put: Int x, String s {
+    }
+end
+
+class B extends A
+    public func put: Int x, String s {
+    }
+end
+
+class Program
+    func run {
+    }
+end

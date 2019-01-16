@@ -1,0 +1,57 @@
+@nce
+
+/*
+  @filename   ok-sem08.ci
+
+  @comment    Testa se o compilador aceita redefinicoes de metodos com tipos dos
+  parametros iguais mas nomes diferentes.
+  */
+
+open
+class A 
+   
+   private Int i;
+   
+   public put: Int x, Int y, Boolean ok {
+    
+      if (x > y) && ok {
+         self.i = 0;
+      }
+      
+   }
+   
+   public func get -> Int {
+      return self.i;
+   }   
+   
+   public set: Int i {
+      self.i = i;
+   }   
+
+end
+
+
+class B extends A 
+
+   override   
+   public put: Int x, Int y, Boolean ok {
+    
+      if ( (a + b) < 1) && !c  {
+         Out.print: 0;
+      }
+   }   
+
+end
+
+
+class Program 
+   
+   func run {
+      var B b;
+      
+      b = B.new;
+      b.put: 1, 2, true;
+   }   
+
+end
+

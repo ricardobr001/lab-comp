@@ -1,0 +1,12 @@
+@cep(10, "'++' can only be used with Int or String")
+
+class A
+end
+
+class Program
+    func run {
+        var A a;
+        a = A.new;
+        Out.println: "a = " ++ a;
+    }
+end

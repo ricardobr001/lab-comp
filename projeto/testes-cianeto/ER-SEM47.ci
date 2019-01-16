@@ -1,0 +1,38 @@
+@cep(24, "Chamada a método inexistente utilizando 'super'",
+      "Method 'm' was not found in superclass 'B' or its superclasses",
+      "comp.Compiler.factor()")
+open
+class A 
+   
+   private Int n;
+   
+   public func set: Int n{
+      self.n = n;
+   }   
+   public func get -> Int {
+      return self.n;
+   }   
+
+end
+
+
+class B extends A 
+   
+   func m {
+   }   
+   override
+   func get -> Int {
+      super.m;       //#
+      return 0;
+   }   
+
+end
+
+
+class Program 
+   
+   func run {
+   }   
+
+end
+

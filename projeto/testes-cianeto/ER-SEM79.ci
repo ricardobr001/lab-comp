@@ -1,0 +1,15 @@
+/* 
+Gustavo Eda
+edapd12@gmail.com
+*/
+
+@cep(6, "método run: com parâmetros",
+    "Method 'run:' of class 'Program' cannot take parameters",
+    "comp.Compiler.classDec()")
+
+class Program 
+    
+    func run: Int n {  
+    }
+
+end

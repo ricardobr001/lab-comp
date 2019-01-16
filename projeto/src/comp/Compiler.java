@@ -175,6 +175,7 @@ public class Compiler {
         boolean OPEN = false;
         if (lexer.token == Token.ID && lexer.getStringValue().equals("open")) {
             OPEN = true;
+            next();
         }
 
         cianetoClass.setOpenClass(OPEN); // Setando se a classe eh open ou nao
@@ -210,7 +211,7 @@ public class Compiler {
             CianetoClass dad = symbolTable.returnClass(superclassName);
 
             if (dad == null) {
-                error("Did not find class '" + dad.getName() + "', class '" + cianetoClass.getName() + "' cannot extends a closed class or not decleared class");
+                error("Did not find class '" + superclassName + "', class '" + cianetoClass.getName() + "' cannot extends a closed class or not decleared class");
             }
 
             // Salvando a classe pai da classe atual
@@ -326,7 +327,7 @@ public class Compiler {
 
         // Verifica se o token eh diferente '}'
         if (lexer.token != Token.RIGHTCURBRACKET) {
-            error("'{' expected");
+            error("'}' expected");
         }
 
         // O metodo terminou de ser analisado e salvando o metodo na classe atual
@@ -425,17 +426,22 @@ public class Compiler {
 
                 // Se for um Id e o Id for igual a 'Out', chama o writeStat
                 if (lexer.token == Token.ID && lexer.getStringValue().equals("Out")) {
+                    checkSemiColon = true;
                     writeStat();
                 }
                 // Se nao chama o Assign
-                else {
+                else if (lexer.token == Token.ID) {
                     assignExpr();
+                } else {
+                    checkSemiColon = false;
+                    next();
                 }
         }
 
         // Se nao for ifStat nem whileStat, nao verifica se tem ';'
         if (checkSemiColon) {
             check(Token.SEMICOLON, "';' expected");
+            next();
         }
     }
 
@@ -449,7 +455,7 @@ public class Compiler {
             countIdList++; // contar numero de variaveis sendo declaradas
             String id = lexer.getStringValue();
             CianetoAttribute c = new CianetoAttribute(id, t, null);
-            if (actualMethod.getLocal(id) != null){ // verifica se variavel local já existe
+            if (actualMethod.getLocal(id) == null){ // verifica se variavel local já existe
                 actualMethod.putVariable(id, c);
             }else{
                 error("variable already declared");
@@ -603,17 +609,32 @@ public class Compiler {
 
     // expr ::= SimpleExpression [ Relation SimpleExpression ]
     private Expr expr() {
-        // TODO: Verificar se as expressoes são do mesmo tipo
-        // TODO: Vericar se faz sentido ter a comparação entre as expressoes. Ex.: true > false
-        simpleExpr();
+        // TODO: Comparação entre classes com a definicão de convertible do pdf
+        Expr first = simpleExpr();
 
         // Se for uma expressao de relacao '==' | '<' | '>' | '<=' ...
         if (relation()) {
+            String relation = lexer.token.toString();
             next();
-            simpleExpr();
+            Expr second = simpleExpr();
+
+            if (relation.equals("<") || relation.equals("<=") || relation.equals(">=") || relation.equals(">")) {
+                if (!first.getType().equals("Int") && !second.getType().equals("Int")){
+                    error("expressions must be Int");
+                }
+            }else if (relation.equals("==") || relation.equals("!=")){
+                if (first.getType().equals("String") && (!second.getType().equals("null") || !second.getType().equals("String"))){
+                    error("String must compare with String or null");
+                }else if (second.getType().equals("String") && (!first.getType().equals("null") || !first.getType().equals("String"))){
+                    error("String must compare with String or null");
+                }else if (!first.getType().equals(second.getType())){
+                    error("incompatible types");
+                }
+            }
+
         }
 
-        return new NullExpr(); // somente para não dar erro
+        return first; // somente para não dar erro
     }
 
     // Relation ::= '==' | '<' | '>' | '<=' | '>=' | '!='
@@ -627,28 +648,77 @@ public class Compiler {
     }
 
     // simpleExpr ::= SumSubExpression { '++' SumSubExpression }
-    private void simpleExpr() {
-        sumSubExpr();
+    private Expr simpleExpr() {
+        boolean flag = false;
+        Expr first = sumSubExpr();
 
         // Se encontrou '+'
-        // TODO: Verificar se o next() consome '+' ou '++'
-        if (lexer.token == Token.PLUS) {
+        while (lexer.token == Token.PLUS) {
+            flag = true;
             next(); // Consome o primeiro '+'
-//            next(); // Consome o segundo
+            if (lexer.token == Token.PLUS){
+                next(); // Consome o segundo
+            } else {
+                error("'+' expected");
+            }
 
-            sumSubExpr();
+            Expr n = sumSubExpr();
+
+            if (!n.getType().equals("Int") && !n.getType().equals("String")){
+                error("incompatible types to concat");
+            }
         }
+
+        if (flag) {
+            if (!first.getType().equals("Int") && !first.getType().equals("String")) {
+                error("incompatible types to concat");
+            }
+
+            return new Expr("String");
+        }
+
+        return first;
     }
 
     // sumSubExpr ::= Term { LowOperator Term }
-    private void sumSubExpr() {
-        term();
+    private Expr sumSubExpr() {
+        boolean intValues = false;
+        boolean booleanValues = false;
+        Expr first = term();
 
         // Enquanto encontrar '+' | '-' | '||' continua no while
         while (lowOperator()) {
+            String low = lexer.token.toString();
             next(); // Consome o simbolo
-            term();
+
+            Expr n = term();
+
+            if (low.equals("+") || low.equals("-")) {
+                intValues = true;
+                if (!n.getType().equals("Int") || booleanValues){
+                    error("incompatible types in low operator");
+                }
+            } else if (low.equals("||")) {
+                booleanValues = true;
+                if (!n.getType().equals("Boolean") || intValues) {
+                    error("incompatible types in low operator");
+                }
+            }
         }
+
+        if (intValues) {
+            if (!first.getType().equals("Int")) {
+                error("incompatible types in low operator");
+            }
+        }
+
+        if (booleanValues) {
+            if (!first.getType().equals("Boolean")) {
+                error("incompatible types in low operator");
+            }
+        }
+
+        return first;
     }
 
     private boolean lowOperator() {
@@ -660,7 +730,7 @@ public class Compiler {
     }
 
     // term ::= SignalFactor { HighOperator SignalFactor }
-    private void term() {
+    private Expr term() {
         signalFactor();
 
         // Enquanto encontrar '*' | '/' | '&&' continua no while

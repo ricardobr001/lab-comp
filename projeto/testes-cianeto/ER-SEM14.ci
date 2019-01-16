@@ -1,0 +1,14 @@
+@cep(9, "Expressoes booleanas nao podem ser escritas")
+  
+
+class Program 
+   
+   func run {
+      var Boolean b;
+
+      b = false;
+      Out.println: b;
+   }   
+
+end
+

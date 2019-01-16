@@ -1,6 +1,6 @@
 package ast;
 
-public class LiteralInt extends Expr {
+public class LiteralInt {
     
     public LiteralInt( int value ) { 
         this.value = value;

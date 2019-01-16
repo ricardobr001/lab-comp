@@ -1,0 +1,27 @@
+@nce
+
+/*
+  @filename   ok-sem11.ci
+
+  @comment    Testa se o compilador aceita metodo com mesmo nome
+  que classe.
+  */
+
+class A 
+   
+   public func A {
+   }   
+
+end
+
+
+class Program 
+   
+   func run {
+      var A a;
+      
+      a = A.new;
+      a.A;
+   }   
+
+end

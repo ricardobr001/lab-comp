@@ -1,0 +1,19 @@
+/* -----------------------
+ * Carlos Tadeu C. S
+ * tadeucarlos07@gmail.com
+ * ----------------------- */
+
+@cep(8, "O compilador devera sinalizar erro 'break fora de while'", 
+	"'break' statement found outside a 'while' statement", 
+	"comp.Compiler.statement())")
+  
+
+class Program 
+   
+	func run {
+		break;
+	}   
+
+end
+
+
