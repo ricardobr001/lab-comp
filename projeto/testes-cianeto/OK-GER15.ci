@@ -50,8 +50,8 @@ end
 
 
 class B extends A
-    var int i;
-    var int j;
+    var Int i;
+    var Int j;
     
     private func p {
         Out.print: self.i;

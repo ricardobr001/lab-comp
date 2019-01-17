@@ -7,7 +7,7 @@ giovanna.blasco@hotmail.com
 
 class Program
   
-    private Int a;
+    private var Int a;
   
     func run {
 

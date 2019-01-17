@@ -3,7 +3,7 @@ Vinicius Silva Salinas
 vinicius_salis@hotmail.com
 */
 
-@cep(20, "Ausencia do caracter '{' apos 'run'", "")
+@cep(22, "Ausencia do caracter '{' apos 'run'", "")
 
 class A
     var Int num1
@@ -11,7 +11,7 @@ class A
     var Int result
      
     func mult -> Int { return self.num1 * self.num2; }
-    func div: Int num3, Int num4 { result = num3 / num4; }
+    func div: Int num3, Int num4 { self.result = num3 / num4; }
 end
 
 class B
@@ -33,7 +33,7 @@ class Program
         b = B.new;
 
         c = In.readString;
-        b.set: c;
+        b.setName: c;
 
         Out.println: b.getName;
     }

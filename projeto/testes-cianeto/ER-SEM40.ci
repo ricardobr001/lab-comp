@@ -11,7 +11,7 @@ evelincontatos@gmail.com
 open 
 class A
 
-    private Int n;
+    private var Int n;
 
     func set: Int n {
         self.n = n;

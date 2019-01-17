@@ -57,7 +57,7 @@ class C extends B
     }
 
     func m4:Int n {
-        super.m3: 3;
+        self.m3: 3;
         Out.println: "4 " ++ n;
     }
 

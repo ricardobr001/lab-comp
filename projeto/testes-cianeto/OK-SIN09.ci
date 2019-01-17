@@ -9,7 +9,7 @@ ricardomlealjr@gmail.com
 
   @comment    Testa :
     - aceitacao de declaracao de metodos privados;
-    - chamada destes metodos usando this;
+    - chamada destes metodos usando self;
     - uso de variaveis de instancia pelos metodos privados
   */
 
@@ -26,7 +26,7 @@ class A
     }
 
     public func m -> Int {
-        self.m2(0);
+        self.m2: 0;
         return self.m1 + self.k;
     }
 

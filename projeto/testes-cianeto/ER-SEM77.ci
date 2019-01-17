@@ -3,7 +3,7 @@ Gustavo Eda
 edapd12@gmail.com
 */
 
-@cep(4, "Classe 'Program' sem método 'run'", 
+@cep(9, "Classe 'Program' sem método 'run'", 
     "Method 'run' was not found in class 'Program'",
     "comp.Compiler.classDec()")
 

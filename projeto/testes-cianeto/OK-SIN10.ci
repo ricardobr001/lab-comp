@@ -7,7 +7,7 @@ ricardomlealjr@gmail.com
 /*
   @filename   ok-sin10.kra
 
-  @comment    Testa escrita com super e this (variaveis de instancia e metodos).
+  @comment    Testa escrita com super e self (variaveis de instancia e metodos).
   */
 open
 class A
@@ -17,7 +17,7 @@ class A
         return self.n;
     }
 
-    public set: Int pn {
+    public func set: Int pn {
         self.n = pn;
     }
 end
@@ -30,11 +30,14 @@ class B extends A
 
         i = In.readInt;
         self.k = In.readInt;
-        super set: 0;
-        Out.println: super get, self.get, self.k, i;
+        super.set: 0;
+        Out.println: super.get;
+        Out.println: self.get;
+        Out.println: self.k;
+        Out.println: i;
     }
 
-    public print {
+    public func print {
         Out.println: self.k;
     }
 end

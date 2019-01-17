@@ -16,12 +16,12 @@
 
 class Person
    
-   private String course;
-   private Int number;
-   private Int age;
-   private String  name;
+   private var String course;
+   private var Int number;
+   private var Int age;
+   private var String  name;
    
-   public func getCourse -> String{
+   public func getCourse -> String {
       return self.course;
    }   
    
@@ -37,12 +37,12 @@ class Person
       self.number = number;
    }   
    
-   public func init: String  name, Int age {
+   public func init: String name, Int age {
       self.name = name;
       self.age = age;
    }   
    
-   public func  getName -> String {
+   public func getName -> String {
       return self.name;
    }   
    
@@ -59,8 +59,8 @@ end
 
 class Group
    
-   private Person first;
-   private Person second;
+   private var Person first;
+   private var Person second;
    
    public func set: Person first, Person second {
       self.first = first;
@@ -85,9 +85,9 @@ end
 
 class University
    
-   private String  name;
-   private Int numberOfStudents;
-   private String  city;
+   private var String  name;
+   private var Int numberOfStudents;
+   private var String  city;
    
    public func init: String  name, String  city, Int numberOfStudents {
       self.name = name;
@@ -107,15 +107,15 @@ end
 class Program
    
    public func run {
-      University s;
-      Person joao;
-      Person maria;
-      Group g;
+      var University s;
+      var Person joao;
+      var Person maria;
+      var Group g;
       
       s = University.new;
       s.init: "UFSCar", "Sao Carlos", 7000;
       s.print;
-	  Out.println "";
+      Out.println: "";
       joao = Person.new;
       joao.init: "Joao", 21;
       joao.setCourse: "EnC";
@@ -125,13 +125,13 @@ class Program
       maria.setCourse: "Fisioterapia";
       maria.setNumber: 8607;
       joao.print;
-	  Out.println: ""
+      Out.println: ""
       maria.print;
-	  Out.println: ""
+      Out.println: ""
       g = Group.new;
       g.set: joao, maria;
       g.print;
-	  Out.println: ""
+      Out.println: ""
    }   
 
 end

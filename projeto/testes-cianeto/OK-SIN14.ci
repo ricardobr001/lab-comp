@@ -12,11 +12,11 @@
     this.p.set(0, 0);
 */
 
-class Point {
+class Point 
 
     var Int x;
     var Int y;
-    func set : Int x, Int y {
+    func set: Int x, Int y {
         self.x = x;
         self.y = y;
     }
@@ -28,9 +28,10 @@ class Point {
     func getY -> Int {
         return self.y;
     }
-}
+    
+end
 
-class Program {
+class Program 
     
     var Point p;
 
@@ -42,4 +43,5 @@ class Program {
     func getPoint -> Point {
         return self.p;
     }
-}
+    
+end

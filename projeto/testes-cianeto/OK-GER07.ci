@@ -13,12 +13,12 @@ matheus.jesus@dcomp.sor.ufscar.br
 
 class A
     func m {
-        Out.println 000000000000000000000000000000000000000000000000000000000000000000000000000000;
+        Out.println: 000000000000000000000000000000000000000000000000000000000000000000000000000000;
     }   
 end
 
 
-class Program { 
+class Program 
     func run {
         var A a;
       

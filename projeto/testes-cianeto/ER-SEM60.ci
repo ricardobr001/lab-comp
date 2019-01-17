@@ -19,6 +19,7 @@ end
 
 class B extends A
 
+    override
     func m {
         super.p;   
     }

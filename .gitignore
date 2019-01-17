@@ -6,3 +6,5 @@ output
 
 # Ignorando saida do compilador 'report.txt'
 report.txt
+
+.DS_Store

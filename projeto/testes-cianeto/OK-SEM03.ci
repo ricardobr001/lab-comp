@@ -9,7 +9,7 @@
     @filename   ok-sem03.ci
 
     @comment    testa se o compilador aceita comparacoes com == e != com
-                Strings e null
+                Strings e nil
 */
 
 
@@ -20,9 +20,9 @@ class Program
 
         r = "Ola";
         s = "Tudo bem?";
-        if ( (r == s) && (r != s) && (r == null) && (null == r) &&
-            (r == "Ola") && ("Ola" == r) && (r != null) && (r != "Ola") &&
-            ("Ola" != r) && ("null" == null) ) {
+        if ( (r == s) && (r != s) && (r == nil) && (nil == r) &&
+            (r == "Ola") && ("Ola" == r) && (r != nil) && (r != "Ola") &&
+            ("Ola" != r) && ("nil" == nil) ) {
             Out.println: "impossivel";
         }
     }

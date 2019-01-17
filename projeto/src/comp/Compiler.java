@@ -808,26 +808,74 @@ public class Compiler {
 
                 break;
             default:
-
-                // TODO: Verificar como identificar qual metodo chamar objectCreation | primaryExpr
-                // verifica objectCreation e Id. do primaryExpr
-                if (lexer.token == Token.ID) {
+                // obj creation
+                // a = b.new | a = b.new;
+                if (lexer.token == Token.ID) { // 'a' FIRST ID
+                    String firstID = lexer.getStringValue();
                     next();
-                    if (lexer.token == Token.DOT){
+
+                    // A variavel para receber atribuicao precisa ter sido declarada
+                    // No parametro, ou localmente no metodo
+
+                    // TODO: VERIFICAR!!
+                    // Para acessar os atributos da classe eh necessario utilizar o self?????
+                    // TODO: VERIFICAR!!
+
+                    if (actualMethod.getLocal(firstID) == null && actualMethod.getParameterById(firstID) == null) {
+                        error("variable '" + firstID + "' was not declared in method '" + actualMethod.getName() + "'");
+                    }
+
+                    if (lexer.token == Token.ASSIGN) { // '=' ASSIGN SYMBOL
                         next();
-                        if (lexer.token == Token.NEW){
-                            next(); // consumindo o objectCreation
-                            // TODO: Armazenar o objeto criado
-                        }else {
-                            if (lexer.token == Token.ID){
-                                next(); // consomindo Id
-                            }else if (lexer.token == Token.IDCOLON){
+                        if (lexer.token == Token.ID) { // 'b' SECOND ID, pode ser uma classe
+                            String secondID = lexer.getStringValue();
+                            next();
+                            if (lexer.token == Token.DOT) { // '.' pode chamar um outro attr, metodo ou 'new'
                                 next();
-                                exprList();
-                            }else {
-                                error("Id or IdColon was expected");
+                                if (lexer.token == Token.NEW) { // 'new' SECOND ID com ctz eh uma classe
+                                    next(); // consumindo o objectCreation
+
+                                    // Como estamos no 'new', b com certeza eh uma classe, logo ele representa o proprio tipo
+                                    if (actualMethod.getLocal(firstID) != null) {
+                                        String varAssignType = actualMethod.getLocal(firstID).getType();
+
+                                        if (!varAssignType.equals(secondID)) {
+                                            error("incompatible type encountered in assign");
+                                        }
+                                    } else {
+                                        String varAssignType = actualMethod.getParameterById(firstID).getType();
+
+                                        if (!varAssignType.equals(secondID)) {
+                                            error("incompatible type encountered in assign");
+                                        }
+                                    }
+
+                                    e = new Expr(secondID);
+
+                                    // Variavel local, nao possui qualifier
+                                    CianetoAttribute attr = new CianetoAttribute(firstID, secondID, "");
+                                    actualMethod.putVariable(firstID, attr);
+                                } else {
+                                    // TODO: verificar chamada depois do SECOND ID
+                                    if (lexer.token == Token.ID) {
+                                        next(); // consomindo Id
+                                    } else if (lexer.token == Token.IDCOLON) {
+                                        next();
+                                        exprList();
+                                    } else {
+                                        error("Id or IdColon was expected");
+                                    }
+                                    // TODO: Armazenar o objeto / variavel no escopo local do metodo
+                                }
                             }
                         }
+                    } else {
+                        if (lexer.token != Token.DOT) {
+                            error("expected '.' after identifier '" + firstID + "'");
+                        }
+
+                        next();
+                        e = primaryExpr();
                     }
                 } else {
                     e = primaryExpr();
@@ -1118,9 +1166,11 @@ public class Compiler {
         next(); // consome o '.'
         if (lexer.token == Token.READINT || lexer.token == Token.READSTRING){
             next();
-        } else {
-            error("expected 'readInt' or 'readString' after '.'");
         }
+        // TODO: No pdf está que apenas pode ser lido int e string, porem na gramatica está opcional
+//        else {
+//            error("expected 'readInt' or 'readString' after '.'");
+//        }
     }
 
     // fieldDec ::= 'var' Type IdList ';'

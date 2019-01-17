@@ -12,7 +12,7 @@
 open
 class A 
    
-   private var Int n;
+   private Int n;
    
    func set: Int pn {
       self.n = pn;

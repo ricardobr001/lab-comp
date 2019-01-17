@@ -4,13 +4,13 @@
  * ----------------------- */
 
 @cep(7, "Palavra reservada utilizada como variavel", 
-	"Identifier expected", "comp.Compiler.localDec()")
+    "Identifier expected", "comp.Compiler.localDec()")
   
 
 class Program
   
     func run {
-		var Int write;
-	}
+        var Int while;
+    }
 
 end

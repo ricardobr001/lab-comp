@@ -3,7 +3,7 @@
     hicaarol@gmail.com
 */
 
-@cep(16, "Método 'put' da classe 'B' possui valor de retorno. Na superclasse 'A', não",
+@cep(17, "Método 'put' da classe 'B' possui valor de retorno. Na superclasse 'A', não",
        "Method 'put' of subclass 'B' has a signature different from method inherited from superclass 'A'",
        "comp.Compiler.methodDec()")
 
@@ -19,6 +19,7 @@ end
 
 class B extends A 
     
+    override
     func put -> Int {
         return 0;
     }

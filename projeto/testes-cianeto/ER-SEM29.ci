@@ -7,10 +7,10 @@
   "Method 'put' of the subclass 'B' has a signature different from the same method of superclass 'A',
   "comp.Compiler.methodDec() or comp.Compiler.classDec()")
 
-
+open
 class A 
     
-    func put {
+    func put: Int x, Int y {
     }   
 
 end

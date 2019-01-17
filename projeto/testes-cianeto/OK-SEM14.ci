@@ -8,7 +8,7 @@ renanrfranca@gmail.com
 /*
     @filename   OK-SEM14.ci
 
-    @comment    Testa se o compilador aceita atribuicao a null e comparacoes
+    @comment    Testa se o compilador aceita atribuicao a nil e comparacoes
                 == e !=
   */
 

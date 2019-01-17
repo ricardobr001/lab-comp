@@ -13,5 +13,5 @@ michael-santos@outlook.com.br
     */
 
         class Program
-             fun run {    { } }
+             func run {   }
         end

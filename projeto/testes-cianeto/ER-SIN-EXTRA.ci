@@ -3,7 +3,7 @@ Matteus Takeshi Dias
 matteus_cti@hotmail.com
 */
 
-@cep(6, "Corpo do método ausente", "'{' expected", "comp.Compiler.methodDec()")
+@cep(7, "Corpo do método ausente", "'{' expected", "comp.Compiler.methodDec()")
 
 class Carro
     func acelerar {
