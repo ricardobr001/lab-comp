@@ -13,6 +13,6 @@
 class Program 
 
     func run {
-        Out.println : ((1 + 2) + (-3));
+        Out.println: ((1 + 2) + (-3));
     }
 end

@@ -619,14 +619,14 @@ public class Compiler {
             Expr second = simpleExpr();
 
             if (relation.equals("<") || relation.equals("<=") || relation.equals(">=") || relation.equals(">")) {
-                if (!first.getType().equals("Int") && !second.getType().equals("Int")){
-                    error("expressions must be Int");
+                if (!first.getType().equals("int") && !second.getType().equals("int")){
+                    error("expressions must be int");
                 }
             }else if (relation.equals("==") || relation.equals("!=")){
-                if (first.getType().equals("String") && (!second.getType().equals("null") || !second.getType().equals("String"))){
-                    error("String must compare with String or null");
-                }else if (second.getType().equals("String") && (!first.getType().equals("null") || !first.getType().equals("String"))){
-                    error("String must compare with String or null");
+                if (first.getType().equals("string") && (!second.getType().equals("null") || !second.getType().equals("string"))){
+                    error("string must compare with string or null");
+                }else if (second.getType().equals("string") && (!first.getType().equals("null") || !first.getType().equals("string"))){
+                    error("string must compare with string or null");
                 }else if (!first.getType().equals(second.getType())){
                     error("incompatible types");
                 }
@@ -664,17 +664,17 @@ public class Compiler {
 
             Expr n = sumSubExpr();
 
-            if (!n.getType().equals("Int") && !n.getType().equals("String")){
+            if (!n.getType().equals("int") && !n.getType().equals("string")){
                 error("incompatible types to concat");
             }
         }
 
         if (flag) {
-            if (!first.getType().equals("Int") && !first.getType().equals("String")) {
+            if (!first.getType().equals("int") && !first.getType().equals("string")) {
                 error("incompatible types to concat");
             }
 
-            return new Expr("String");
+            return new Expr("string");
         }
 
         return first;
@@ -695,25 +695,25 @@ public class Compiler {
 
             if (low.equals("+") || low.equals("-")) {
                 intValues = true;
-                if (!n.getType().equals("Int") || booleanValues){
+                if (!n.getType().equals("int") || booleanValues){
                     error("incompatible types in low operator");
                 }
             } else if (low.equals("||")) {
                 booleanValues = true;
-                if (!n.getType().equals("Boolean") || intValues) {
+                if (!n.getType().equals("boolean") || intValues) {
                     error("incompatible types in low operator");
                 }
             }
         }
 
         if (intValues) {
-            if (!first.getType().equals("Int")) {
+            if (!first.getType().equals("int")) {
                 error("incompatible types in low operator");
             }
         }
 
         if (booleanValues) {
-            if (!first.getType().equals("Boolean")) {
+            if (!first.getType().equals("boolean")) {
                 error("incompatible types in low operator");
             }
         }
@@ -731,13 +731,19 @@ public class Compiler {
 
     // term ::= SignalFactor { HighOperator SignalFactor }
     private Expr term() {
-        signalFactor();
+        Expr first = signalFactor();
 
         // Enquanto encontrar '*' | '/' | '&&' continua no while
         while (highOperator()) {
             next(); // Consome o simbolo
-            signalFactor();
+            Expr second = signalFactor();
+
+            if (!first.getType().equals(second.getType())){ // verifica se atribuição é do mesmo tipo
+                error("incompatible types");
+            }
         }
+
+        return first;
     }
 
     private boolean highOperator() {
@@ -749,13 +755,13 @@ public class Compiler {
     }
 
     // signalFactor ::= [ Signal ] Factor
-    private void signalFactor() {
+    private Expr signalFactor() {
         // Pode encontrar '+' | '-', se encontrar
         if (signal()) {
             next(); // Consome o simbolo
         }
 
-        factor();
+         return factor();
     }
 
     private boolean signal() {
@@ -767,33 +773,39 @@ public class Compiler {
     }
 
     // factor ::= BasicValue | '(' Expression ')' | '!' Factor | 'nil' | ObjectCreation | PrimaryExpr
-    private void factor() {
+    private Expr factor() {
         // TODO: BasicValue eh variavel do tipo INT ou INTLITERAL, STRING OU STRINGLITERAL  ?
+        Expr e = null;
         switch (lexer.token) {
             case LITERALINT:
                 intValue();
+                e = new Expr("int");
                 break;
             case LITERALSTRING:
                 stringValue();
+                e = new Expr("string");
                 break;
             case TRUE:
                 booleanValue();
+                e = new Expr("boolean");
                 break;
             case FALSE:
                 booleanValue();
+                e = new Expr("boolean");
                 break;
             case LEFTPAR:
                 next(); // Consome o '('
-                expr();
+                e = expr();
 
                 check(Token.RIGHTPAR, "')' expected");
                 next(); // Consome o ')'
                 break;
             case NOT:
-                factor();
+                e = factor();
                 break;
             case NULL:
                 next(); // Le o 'nil'
+
                 break;
             default:
 
@@ -818,9 +830,11 @@ public class Compiler {
                         }
                     }
                 } else {
-                    Expr e = primaryExpr();
+                    e = primaryExpr();
                 }
         }
+
+        return e;
     }
 
     /** basicValue ::= IntValue | BooleanValue | StringValue **/
@@ -1056,7 +1070,7 @@ public class Compiler {
                     }
                 }
                 break;
-            case IN: // TODO
+            case IN: // Aparentemente está certo, a analise sintatica verifica se eh 'int' ou 'string'
                 readExpr();
                 break;
             case ID: // TODO
@@ -1085,12 +1099,13 @@ public class Compiler {
 
     // exprList ::= Expression { ',' Expression }
     private List<Expr> exprList() {
-        expr();
+        // TODO: Verificar o tipo no exprList
+        Expr first = expr();
 
         // Enquanto encontrar ',' chama o expr()
         while (lexer.token == Token.COMMA){
             next(); // Consome o ','
-            expr();
+            Expr second = expr();
         }
 
         return new ArrayList<>(); // só pra nao dar erro
@@ -1103,6 +1118,8 @@ public class Compiler {
         next(); // consome o '.'
         if (lexer.token == Token.READINT || lexer.token == Token.READSTRING){
             next();
+        } else {
+            error("expected 'readInt' or 'readString' after '.'");
         }
     }
 
