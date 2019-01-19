@@ -121,5 +121,7 @@ OK-SEM04 - Success
 ER-LEX03 -> ER-LEX08 - OK
 ER-LEX-EXTRA01 - OK
 ER-SEM01 - Não faço ideia como verificar isso
-ER-SEM02 -> ER-SEM05 - OK
+ER-SEM02 -> ER-SEM07 - OK
+ER-SEM08 -> ER-SEM09 - Erro no teste (OK) 
+
 
