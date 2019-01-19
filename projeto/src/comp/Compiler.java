@@ -8,8 +8,6 @@ import java.util.List;
 import java.util.Set;
 
 import ast.*;
-import com.sun.org.apache.bcel.internal.generic.RETURN;
-import jdk.nashorn.internal.codegen.types.BooleanType;
 import lexer.Lexer;
 import lexer.Token;
 
