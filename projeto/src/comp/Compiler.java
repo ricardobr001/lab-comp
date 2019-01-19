@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Set;
 
 import ast.*;
+import com.sun.org.apache.bcel.internal.generic.RETURN;
 import jdk.nashorn.internal.codegen.types.BooleanType;
 import lexer.Lexer;
 import lexer.Token;
@@ -330,6 +331,11 @@ public class Compiler {
             error("'}' expected");
         }
 
+        // Se o metodo retorna alguma coisa, e nao encontrou return fora de if ou laco de repeticao, lanca um erro
+        if (actualMethod.getType() != null && !RETURNFLAG) {
+            error("missing 'return' in method '" + actualMethod.getName() + "'");
+        }
+
         // O metodo terminou de ser analisado e salvando o metodo na classe atual
         actualMethod = null;
         actualClass.putMethod(methodName, method);
@@ -395,14 +401,23 @@ public class Compiler {
         // Verifica qual dos statement irá chamar
         switch (lexer.token) {
             case IF:
+                IFFLAG = true;
                 ifStat();
+                IFFLAG = false;
                 checkSemiColon = false;
                 break;
             case WHILE:
+                WHILEFLAG = true;
                 whileStat();
+                WHILEFLAG = false;
                 checkSemiColon = false;
                 break;
             case RETURN:
+                if (IFFLAG || WHILEFLAG || REPEATUNTILFLAG) {
+                    RETURNFLAG = false;
+                } else {
+                    RETURNFLAG = true;
+                }
                 returnStat();
                 break;
             case BREAK:
@@ -413,7 +428,9 @@ public class Compiler {
                  checkSemiColon = false;
                 break;
             case REPEAT:
+                REPEATUNTILFLAG = true;
                 repeatStat();
+                REPEATUNTILFLAG = false;
                 break;
             case VAR:
                 localDec();
@@ -447,7 +464,18 @@ public class Compiler {
         int countIdList = 0;
         next(); // le token 'var'
         String t = type();
+
+        // Se o tipo for diferente de 'int', 'boolean' ou 'string'
+        if (!t.equals("int") && !t.equals("boolean") && !t.equals("string")) {
+            // Verifica se a classe foi declarada
+            if (symbolTable.returnClass(t) == null) {
+                error("type '" + t + "' was not found");
+            }
+        }
+
+        // Checa se tem um ID depois do tipo
         check(Token.ID, "A variable name was expected");
+
         while (lexer.token == Token.ID) {
             countIdList++; // contar numero de variaveis sendo declaradas
             String id = lexer.getStringValue();
@@ -455,7 +483,7 @@ public class Compiler {
             if (actualMethod.getLocal(id) == null){ // verifica se variavel local já existe
                 actualMethod.putVariable(id, c);
             }else{
-                error("variable already declared");
+                error("variable '" + id + "' already declared");
             }
             next();
             if (lexer.token == Token.COMMA) {
@@ -589,7 +617,11 @@ public class Compiler {
         }
 
         next();
-        expr();
+        Expr e = expr();
+
+        if (e.getType().equals("boolean")) {
+            error("can't print variable or expression of type boolean");
+        }
     }
 
     // assignExpr ::= Expression [ '=' Expression ]
@@ -808,6 +840,7 @@ public class Compiler {
                 next(); // Consome o ')'
                 break;
             case NOT:
+                next();
                 e = factor();
                 break;
             case NULL:
@@ -1144,11 +1177,20 @@ public class Compiler {
                 // Pode ter ou nao '.'
                 if (lexer.token == Token.DOT) {
                     next(); // consome o '.'
-                    if (actualMethod.getLocal(id).getType().equals("int") || actualMethod.getLocal(id).getType().equals("string") ||
+
+                    // Se nao encontrar o id localmente, esta chamando uma classe
+                    if (actualMethod.getLocal(id) == null && actualMethod.getParameterById(id) == null && symbolTable.returnClass(id) != null) {
+                        // O unico metodo que pode ser chamado de uma classe eh o 'new'
+                        auxType = id;
+                        if (lexer.token == Token.NEW) {
+                            next();
+                        } else {
+                            error("expected method 'new'");
+                        }
+                    } else if (actualMethod.getLocal(id).getType().equals("int") || actualMethod.getLocal(id).getType().equals("string") ||
                             actualMethod.getLocal(id).getType().equals("boolean")){
                         error("basic type cannot have methods");
-                    }
-                    if (lexer.token == Token.ID) {
+                    } else if (lexer.token == Token.ID) {
                         next(); // Consome o 'ID'
                     } else if (lexer.token == Token.IDCOLON) {
                         next(); // Consome o 'IDCOLON'
@@ -1246,7 +1288,7 @@ public class Compiler {
             String idType = lexer.getStringValue();
             // TODO: Verifica se o id existe (classe)
             next();
-            return idType.toLowerCase();
+            return idType;
         }
         // Lança um erro se não for ID nem um tipo basico
         else {
@@ -1260,7 +1302,7 @@ public class Compiler {
     //                  'final' | 'final' 'public' | 'final' 'override' |
     //                  'final' 'override' 'public'
     private String qualifier() {
-        String q = "";
+        String q = "public";
         // Parte ja implementada pelo professor
         if (lexer.token == Token.PRIVATE) { // private
             next(); q = "private";
@@ -1339,5 +1381,5 @@ public class Compiler {
     private ErrorSignaller signalError;
     private CianetoClass actualClass;
     private CianetoMethod actualMethod;
-
+    private boolean WHILEFLAG = false, IFFLAG = false, REPEATUNTILFLAG = false, RETURNFLAG = false;
 }

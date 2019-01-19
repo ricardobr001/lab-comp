@@ -104,24 +104,50 @@ class Foo
 end
 ```
 
-# Testes Lexicos 
-OK-LEX02 - Success
-OK-LEX03 - Success
-OK-LEX04 - gramatica errada (?)
-OK-LEX05 - Number out of limits
-OK-LEX06 - { } (?)
-OK-LEX08 - Success
-OK-LEX10 - Success
-ok-math - Erro no Comp
-ok-queue - Erro no Comp
-OK-SEM03 - Success
-OK-SEM04 - Success
+# Testes
+- [ ] `arquivo` - `motivo do erro caso nao passe no teste`
+- [ ] `ER-LEX-EXTRA01.ci` - `Erro encontrado na linha 14, deveria ser na 29`
+- [ ] `er-lex01.ci` - `nao tem anotação no teste, não é testado`
+- [ ] `er-lex02.ci` - `nao tem anotação no teste, não é testado`
+- [x] `ER-LEX03.ci`
+- [x] `ER-LEX04.ci` - `Erro sinalizado corretamente, mas pritando pilha de erros do java no terminal`
+- [x] `ER-LEX05.ci`
+- [x] `ER-LEX06.ci`
+- [x] `ER-LEX07.ci`
+- [x] `ER-LEX08.ci`
+- [ ] `ER-SEM-100.ci` - `Anotação do erro depois da declaração da primeira classe, não é testado`
+- [x] `ER-SEM-EXTRA01.ci`
+- [ ] `ER-SEM-EXTRA02.ci` - `Erro encontrado na linha 14, deveria ser na 36`
+- [x] `ER-SEM01.ci`
+- [x] `ER-SEM02.ci`
+- [x] `ER-SEM03.ci`
+- [x] `ER-SEM04.ci`
+- [x] `ER-SEM05.ci`
+- [x] `ER-SEM07.ci` - `Melhorar mensagem de erro?`
+- [x] `ER-SEM08.ci` - `Melhorar mensagem de erro?`
+- [x] `ER-SEM09.ci` - `Melhorar mensagem de erro?`
+- [x] `ER-SEM11.ci`
+- [x] `ER-SEM12.ci` - `Melhorar mensagem de erro?`
+- [ ] `ER-SEM13.ci` - `Pilha de erros do java, não é testado` arquivo não é aberto p/ leitura provavelmente
+- [x] `ER-SEM14.ci`
+- [x] `ER-SEM15.ci`
+- [ ] `ER-SEM16.ci` - `Pilha de erros do java, não é testado` arquivo não é aberto p/ leitura provavelmente
+- [ ] `ER-SEM17.ci` - `Pilha de erros do java, não é testado` arquivo não é aberto p/ leitura provavelmente
+- [x] `ER-SEM18.ci`
+- [x] `ER-SEM19.ci`
+- [x] `ER-SEM20.ci`
+- [x] `ER-SEM21.ci`
+- [ ] `ER-SEM22.ci` - `Pilha de erros do java, não é testado` arquivo não é aberto p/ leitura provavelmente
 
-
-ER-LEX03 -> ER-LEX08 - OK
-ER-LEX-EXTRA01 - OK
-ER-SEM01 - Não faço ideia como verificar isso
-ER-SEM02 -> ER-SEM07 - OK
-ER-SEM08 -> ER-SEM09 - Erro no teste (OK) 
-
-
+# Testes anteriores
+- [x] `OK-LEX02`
+- [x] `OK-LEX03`
+- [x] `OK-LEX04`
+- [x] `OK-LEX05`
+- [x] `OK-LEX06`
+- [x] `OK-LEX08`
+- [x] `OK-LEX10`
+- [ ] `ok-math` - `Erro no Comp`
+- [ ] `ok-queue` - `Erro no Comp`
+- [x] `OK-SEM03`
+- [x] `OK-SEM04`
