@@ -73,6 +73,12 @@ public class Compiler {
             }
 
         }
+
+        // TODO: Dando erro no java, nao escreve no arquivo 'report.txt', investigar!!
+        if (symbolTable.returnClass("Program") == null) {
+            error("class 'Program' was not found in this file");
+        }
+
         if (!thereWasAnError && lexer.token != Token.EOF) {
             try {
                 error("End of file expected");
@@ -252,6 +258,14 @@ public class Compiler {
                 break;
             }
         }
+
+        // Se a classe atual for a classe 'Program'
+        if (actualClass.getName().equals("Program")) {
+            // Ela deve ter o metodo 'run', se nao tiver lanca um erro
+            if (actualClass.getMethod("run") == null) {
+                error("method 'run' was not found in class 'Program'");
+            }
+        }
     }
 
     private void error(String msg) {
@@ -284,6 +298,35 @@ public class Compiler {
         if (lexer.token == Token.ID) {
             // Recuperando o nome do metodo
             methodName = lexer.getStringValue();
+            CianetoClass dad = actualClass.getDad();
+            String dadMethodQualifier = "";
+
+            // Se a classe extende de outra classe
+            while (dad != null) {
+                // Se o pai nao possui o metodo, procura na classe pai,
+                if (dad.getMethod(methodName) == null) {
+                    dad = dad.getDad();
+                } else {
+                    dadMethodQualifier = dad.getMethod(methodName).getQualifier();
+                    break;
+                }
+            }
+
+            // Caso o pai tenha o metodo
+            if (!dadMethodQualifier.equals("")) {
+                // Se tiver o 'public' o metodo na classe atual
+                if (dadMethodQualifier.contains("public")) {
+                    // O metodo deve ter a palava 'override', se nao tiver lanca um erro
+                    if (!q.contains("override")) {
+                        error("'override' expected before '" + methodName + "' in class '" + actualClass.getName() + "'");
+                    }
+                }
+            }
+
+            // Verificando se a classe ja possui esse metodo delcarado, se tiver lanca um erro
+            if (actualClass.getMethod(methodName) != null) {
+                error("method '" + methodName + "' was already declared");
+            }
 
             // Setando o nome do metodo e seu qualificador, alem de coloca-lo como metodo atual
             method.setName(methodName);
@@ -306,6 +349,12 @@ public class Compiler {
             formalParamDec();
         } else {
             error("An identifier or identifer: was expected after 'func'");
+        }
+
+        if (actualClass.getName().equals("Program")) {
+            if (!actualMethod.getQualifier().equals("public")) {
+                error("method 'run' in class 'Program' must be 'public'");
+            }
         }
 
         // Se encontrar '->', o metodo retorna alguma coisa
@@ -419,6 +468,9 @@ public class Compiler {
                 returnStat();
                 break;
             case BREAK:
+                if (!WHILEFLAG || !REPEATUNTILFLAG) {
+                    error("'break' found out of loop block 'repeat ... until' or 'while'");
+                }
                 breakStat();
                 break;
             case SEMICOLON:
@@ -443,6 +495,8 @@ public class Compiler {
                 if (lexer.token == Token.ID && lexer.getStringValue().equals("Out")) {
                     checkSemiColon = true;
                     writeStat();
+                } else if (lexer.token == Token.IN) {
+                    readExpr();
                 }
                 // Se nao chama o Assign
                 else {
@@ -460,6 +514,7 @@ public class Compiler {
     // localDec ::= 'var' Type IdList [ '=' Expression ] [';']
     private void localDec() {
         int countIdList = 0;
+        boolean lastDeclComma = false;
         next(); // le token 'var'
         String t = type();
 
@@ -486,11 +541,19 @@ public class Compiler {
             next();
             if (lexer.token == Token.COMMA) {
                 next();
+                lastDeclComma = true;
             } else if (lexer.token == Token.DOT) { // Pode ter mais caracteres invalidos
                 error("Invalid character on declaration");
             } else {
+                lastDeclComma = false;
                 break;
             }
+        }
+
+        // Se a declaracao de varias variaveis terminar em ',' lanca um erro
+        // var Int a, b, ;
+        if (lastDeclComma) {
+            error("expected identifier after ','");
         }
 
         if (lexer.token == Token.ASSIGN) {
@@ -617,7 +680,9 @@ public class Compiler {
         next();
         Expr e = expr();
 
-        if (e.getType().equals("boolean")) {
+        if (e == null) {
+            error("'print:' or 'println' must print something");
+        }else if (e.getType().equals("boolean")) {
             error("can't print variable or expression of type boolean");
         }
     }
@@ -1207,7 +1272,7 @@ public class Compiler {
                 }
                 break;
             default:
-                error("expected 'In', 'super', 'self' or 'id'");
+                error("expected 'In', 'super', 'self' or some identifier");
         }
 
         return new Expr(auxType);
@@ -1234,11 +1299,9 @@ public class Compiler {
         next(); // consome o '.'
         if (lexer.token == Token.READINT || lexer.token == Token.READSTRING){
             next();
+        } else {
+            error("expected 'readInt' or 'readString' after '.'");
         }
-        // TODO: No pdf está que apenas pode ser lido int e string, porem na gramatica está opcional
-//        else {
-//            error("expected 'readInt' or 'readString' after '.'");
-//        }
     }
 
     // fieldDec ::= 'var' Type IdList ';'
