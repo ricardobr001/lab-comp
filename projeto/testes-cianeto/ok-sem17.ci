@@ -3,7 +3,7 @@ William A Alves
 willianadrianoalves@hotmail.com
 */
 @nce
-class Program {
+class Program 
    
     func run {
         
@@ -15,8 +15,8 @@ class Program {
         else {
             Out.println: "grande";
         }
-        assert num < 1000, "Numero bem grande"
-        assert num > 0, "Numero negativo"
+        assert num < 1000, "Numero bem grande";
+        assert num >= 0, "Numero negativo";
          
    }   
 

@@ -1,4 +1,5 @@
-@cep(10, "'++' can only be used with Int or String")
+@cep(8, "'++' can only be used with Int or String",
+         "Illegal types with ++, only Int and String are allowed")
 
 class A
 end

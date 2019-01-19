@@ -7,7 +7,7 @@ willianadrianoalves@hotmail.com
 
 class Program
 
-	var Int numero = 0;
+    var Int numero;
 
     func run: Int numero { 
 

@@ -3,6 +3,6 @@
 class Program 
 
     func run {
-       write( -2147483648 ); 
+       Out.println: -2147483648; 
     }
 end

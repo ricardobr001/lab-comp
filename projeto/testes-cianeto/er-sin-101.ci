@@ -3,14 +3,14 @@ Vitor Mesquita Fogaça
 vitor.fogaca@outlook.com
 */
       
-@cep(2, "missing type in variable declaration"); 
+@cep(2, "missing type in variable declaration", "Type expected"); 
 class Teste
     var n;
-	
+    
     func get -> Int {
         return self.n;
     }
-	
+    
     func set: Int n {
         self.n = n;
     }

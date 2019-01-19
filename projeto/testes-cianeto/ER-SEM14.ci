@@ -1,4 +1,4 @@
-@cep(9, "Expressoes booleanas nao podem ser escritas")
+@cep(9, "Expressoes booleanas nao podem ser escritas", "Attempt to print a boolean expression")
   
 
 class Program 

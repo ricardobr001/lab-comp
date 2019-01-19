@@ -6,7 +6,7 @@
       
 class Program 
 
-    func m {
+    func m -> Int {
        var Int i;
 
        i = 1;

@@ -9,7 +9,7 @@ giovana.vmorais@gmail.com
 
 open 
 class A
-    private Int i;
+    private var Int i;
 
     public func put: Int x, Int y, Boolean ok {
 

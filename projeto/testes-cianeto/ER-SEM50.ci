@@ -1,4 +1,4 @@
-@ce(17, "O compilador deverá sinalizar 'break fora de while'",
+@cep(17, "O compilador deverá sinalizar 'break fora de while'",
    "Command 'break' outside a command 'while'",
    "comp.Compiler.breakStatement()")
 

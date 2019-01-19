@@ -3,13 +3,13 @@
 /*
   @filename   ok-sem11.ci
 
-  @comment    Testa se o compilador aceita metodo com mesmo nome
-  que classe.
+  @comment    Testa se o compilador aceita metodo com nome 'open',
+              que não é uma palavra-chave
   */
 
 class A 
    
-   public func A {
+   public func open {
    }   
 
 end
@@ -21,7 +21,7 @@ class Program
       var A a;
       
       a = A.new;
-      a.A;
+      a.open;
    }   
 
 end

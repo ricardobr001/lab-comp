@@ -9,9 +9,9 @@
 
 class A 
    
-   Int n;
+   var Int n;
    
-   func set: Int pn;
+   func set: Int pn { 
       var Int n;
       
       self.n = pn;

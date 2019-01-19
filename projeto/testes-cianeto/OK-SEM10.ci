@@ -15,7 +15,7 @@ class A
 
 end
 
-
+open
 class B extends A 
    
    func second {
@@ -34,7 +34,7 @@ end
 
 class Program 
    
-   public void run() {
+   public func run {
       var A a;
       var B b;
       var C c;

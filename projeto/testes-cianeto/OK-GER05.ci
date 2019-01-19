@@ -8,7 +8,7 @@ matheus.jesus@dcomp.sor.ufscar.br
 /*
   @filename   ok-ger05.ci
       
-  @comment    Testa se codigo para read e write 'e gerado
+  @comment    Testa se codigo para readInt é gerado
   corretamente.  
   */
 

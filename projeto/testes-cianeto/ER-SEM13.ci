@@ -1,4 +1,4 @@
-@cep(8, "Não há método readBoolean")
+@cep(8, "Não há método readBoolean", "Unknown method 'readBoolean'")
   
 
 class Program 

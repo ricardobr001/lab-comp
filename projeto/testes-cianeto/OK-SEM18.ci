@@ -13,7 +13,7 @@
 */
 
 
-class Program {
+class Program 
 
     func run {
         var Boolean b;
@@ -39,5 +39,5 @@ class Program {
             j = j + 1;
         until (j < n);
     }
-}
+end
 

@@ -3,15 +3,16 @@
     luccalafonte97@gmail.com
 */
 
-@cep(6, "Variável de instância pública",
+@cep(10, "Variável de instância pública",
    "Attempt to declare public instance variable 'i'",
    "comp.Compiler.classDec()")
 
 class Program
 
-    public var Int x;
 
     func run {
     }
+
+    public var Int x;
 
 end

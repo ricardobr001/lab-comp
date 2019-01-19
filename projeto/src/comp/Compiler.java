@@ -295,8 +295,8 @@ public class Compiler {
         }
         // Se nao pode ser um metodo ('Identifier:') com parametros
         else if (lexer.token == Token.IDCOLON) {
-            // Recuperando o nome do metodo e removendo o ';'
-            methodName = lexer.getStringValue().replaceAll(";", "");
+            // Recuperando o nome do metodo e removendo o ':'
+            methodName = lexer.getStringValue().replaceAll(":", "");
 
             // Setando o nome do metodo e seu qualificador, alem de coloca-lo como metodo atual
             method.setName(methodName);
@@ -340,19 +340,19 @@ public class Compiler {
     // formalParamDec ::= paramDec { ',' ParamDec }
     private void formalParamDec() {
         // TODO: Adicionar na tabela para analise semantica
-        paramDec(); // Chama paramDec
+        String type = type();
+        paramDec(type); // Chama paramDec
 
         // Enquanto tiver parametros, chama o paramDec
         while (lexer.token == Token.COMMA) {
             next(); // Consome a ','
-            paramDec();
+            paramDec(type);
         }
     }
 
     // paramDec ::= Type Id
-    private void paramDec() {
+    private void paramDec(String type) {
         // TODO: Adicionar na tabela para analise semantica (o tipo do id)
-        String type = type();
 
         // Se nao encontrar um identificador apos o tipo de uma variavel, lanca um erro
         if (lexer.token != Token.ID) {
@@ -430,11 +430,8 @@ public class Compiler {
                     writeStat();
                 }
                 // Se nao chama o Assign
-                else if (lexer.token == Token.ID) {
+                else {
                     assignExpr();
-                } else {
-                    checkSemiColon = false;
-                    next();
                 }
         }
 
@@ -463,6 +460,8 @@ public class Compiler {
             next();
             if (lexer.token == Token.COMMA) {
                 next();
+            } else if (lexer.token == Token.DOT) { // Pode ter mais caracteres invalidos
+                error("Invalid character on declaration");
             } else {
                 break;
             }
@@ -542,6 +541,7 @@ public class Compiler {
 //      }
 
         check(Token.RIGHTCURBRACKET, "'}' was expected");
+        next();
     }
 
     //ifStat ::= 'if' Expression '{' Statement '}' [ 'else' '{' Statement '}' ]
@@ -594,7 +594,12 @@ public class Compiler {
 
     // assignExpr ::= Expression [ '=' Expression ]
     private void assignExpr() {
-        Expr first = expr();
+        Expr first = null;
+        if (lexer.token == Token.ID){
+            first = expr();
+        } else {
+            error("left-hand of assign must be a variable");
+        }
 
         // Se encontrar um '='
         if (lexer.token == Token.ASSIGN) {
@@ -631,6 +636,8 @@ public class Compiler {
                     error("incompatible types");
                 }
             }
+
+            return new Expr("boolean");
 
         }
 
@@ -808,11 +815,20 @@ public class Compiler {
 
                 break;
             default:
-                // obj creation
-                // a = b.new | a = b.new;
-                if (lexer.token == Token.ID) { // 'a' FIRST ID
+                e = primaryExpr();
+                /*
+                if (lexer.token == Token.ID) {
+
                     String firstID = lexer.getStringValue();
                     next();
+
+                    if (lexer.token == Token.DOT) { // obj creation
+                        if (actualMethod.getLocal(firstID) == null && actualMethod.getParameterById(firstID) == null && actualClass.getAttribute(firstID) == null) {
+                            error("variable '" + firstID + "' was not declared in method '" + actualClass.getName() + "'");
+                        }
+                    } else {
+                        e = primaryExpr();
+                    }
 
                     // A variavel para receber atribuicao precisa ter sido declarada
                     // No parametro, ou localmente no metodo
@@ -821,9 +837,8 @@ public class Compiler {
                     // Para acessar os atributos da classe eh necessario utilizar o self?????
                     // TODO: VERIFICAR!!
 
-                    if (actualMethod.getLocal(firstID) == null && actualMethod.getParameterById(firstID) == null) {
-                        error("variable '" + firstID + "' was not declared in method '" + actualMethod.getName() + "'");
-                    }
+
+
 
                     if (lexer.token == Token.ASSIGN) { // '=' ASSIGN SYMBOL
                         next();
@@ -878,8 +893,9 @@ public class Compiler {
                         e = primaryExpr();
                     }
                 } else {
-                    e = primaryExpr();
+                  e = primaryExpr();
                 }
+                } */
         }
 
         return e;
@@ -1121,20 +1137,32 @@ public class Compiler {
             case IN: // Aparentemente está certo, a analise sintatica verifica se eh 'int' ou 'string'
                 readExpr();
                 break;
-            case ID: // TODO
+            case ID: // TODO validacoes
+                String id = lexer.getStringValue();
                 next(); // consome o 'ID'
 
                 // Pode ter ou nao '.'
                 if (lexer.token == Token.DOT) {
                     next(); // consome o '.'
-
+                    if (actualMethod.getLocal(id).getType().equals("int") || actualMethod.getLocal(id).getType().equals("string") ||
+                            actualMethod.getLocal(id).getType().equals("boolean")){
+                        error("basic type cannot have methods");
+                    }
                     if (lexer.token == Token.ID) {
                         next(); // Consome o 'ID'
                     } else if (lexer.token == Token.IDCOLON) {
                         next(); // Consome o 'IDCOLON'
                         exprList();
+                    } else if (lexer.token == Token.NEW) {
+                        next();
                     } else {
-                        error("An Id or IdColon was expected after '.'");
+                        error("An Id, IdColon or new was expected after '.'");
+                    }
+                } else {
+                    if (actualMethod.getLocal(id) != null) {
+                        auxType = actualMethod.getLocal(id).getType();
+                    } else {
+                      error("variable not declared");
                     }
                 }
                 break;
@@ -1213,12 +1241,12 @@ public class Compiler {
         if (lexer.token == Token.INT || lexer.token == Token.BOOLEAN || lexer.token == Token.STRING) {
             String idType = lexer.getStringValue();
             next();
-            return idType;
+            return idType.toLowerCase();
         } else if (lexer.token == Token.ID) {
             String idType = lexer.getStringValue();
             // TODO: Verifica se o id existe (classe)
             next();
-            return idType;
+            return idType.toLowerCase();
         }
         // Lança um erro se não for ID nem um tipo basico
         else {

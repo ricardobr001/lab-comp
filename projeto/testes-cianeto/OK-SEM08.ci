@@ -10,9 +10,9 @@
 open
 class A 
    
-   private Int i;
+   private var Int i;
    
-   public put: Int x, Int y, Boolean ok {
+   public func put: Int x, Int y, Boolean ok {
     
       if (x > y) && ok {
          self.i = 0;
@@ -24,7 +24,7 @@ class A
       return self.i;
    }   
    
-   public set: Int i {
+   public func set: Int i {
       self.i = i;
    }   
 
@@ -34,9 +34,9 @@ end
 class B extends A 
 
    override   
-   public put: Int x, Int y, Boolean ok {
+   public func put: Int x, Int y, Boolean ok {
     
-      if ( (a + b) < 1) && !c  {
+      if ( (x + y) < 1) && !ok  {
          Out.print: 0;
       }
    }   

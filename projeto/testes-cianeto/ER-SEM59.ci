@@ -9,19 +9,19 @@ giovana.vmorais@gmail.com
 "comp.Compiler.factor()")
 
 class A
-	private func p {
-	}
+    private func p {
+    }
 
-	public func m {
-	  	self.p;
-	}
+    public func m {
+        self.p;
+    }
 end
 
 class Program 
-	func run {
-	    var A a;
+    func run {
+        var A a;
 
-		a = A.new;
-		a.p;
-	}
-}
+        a = A.new;
+        a.p;
+    }
+end

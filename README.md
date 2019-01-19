@@ -117,3 +117,9 @@ ok-queue - Erro no Comp
 OK-SEM03 - Success
 OK-SEM04 - Success
 
+
+ER-LEX03 -> ER-LEX08 - OK
+ER-LEX-EXTRA01 - OK
+ER-SEM01 - Não faço ideia como verificar isso
+ER-SEM02 -> ER-SEM05 - OK
+

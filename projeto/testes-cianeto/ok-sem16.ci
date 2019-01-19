@@ -3,16 +3,16 @@ William A Alves
 willianadrianoalves@hotmail.com
 */
 @nce
-class Milhar { 
+class Milhar 
     var Int numero;
     func getUser -> Int {
         self.numero = In.readInt; 
-        self.numero = numero*1000;
+        self.numero = self.numero*1000;
         return self.numero;
     }
 end
 
-class Program {
+class Program 
     func run { 
         var Milhar numero; 
         numero = Milhar.new;
