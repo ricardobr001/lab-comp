@@ -3,7 +3,7 @@ Giovanna Blasco Martin
 giovanna.blasco@hotmail.com
 */
 
-@cep(17, "Chamada a método privado da superclasse", "Method 'p' was not found in the public interface of 'A' or its superclasses", "comp.Compiler.factor()" )
+@cep(18, "Chamada a método privado da superclasse", "Method 'p' was not found in the public interface of 'A' or its superclasses", "comp.Compiler.factor()" )
   
 open
 class A  

@@ -37,7 +37,7 @@ class A
     
     func calculaNotaB: Int ntrab, Int nprov -> Int{
         var Int ans;
-        ans = (2 * ntrab + prov)/3;
+        ans = (2 * ntrab + nprov)/3;
         return ans;
     }
 end
@@ -79,7 +79,7 @@ class Program
           Out.println: ans;
       } 
       else {
-          if ans == 11 && nprov < 6 {
+          if (ans == 11) && (nprov < 6) {
               a = B.new;
               Out.println: (a.calculaNotaB: ntrab, nprov);
           } 

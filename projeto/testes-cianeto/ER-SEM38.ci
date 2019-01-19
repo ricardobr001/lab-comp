@@ -3,7 +3,7 @@ Evelin Soares
 evelincontatos@gmail.com
 */
 
-@cep(16, "A instrução 'b = a' está errada. Variáveis de subclasses não podem receber objetos de superclasses",
+@cep(14, "A instrução 'b = a' está errada. Variáveis de subclasses não podem receber objetos de superclasses",
    "Type error: type of the right-hand side of the assignment is not a subclass of the left-hand side",
    "comp.Compiler.assignExprLocalDec()")
 

@@ -3,8 +3,8 @@ Luciane Lopes
 luciane.silva@msn.com
 */
 
-@cep(12, "'until' esperado", 
-  "'until' expected", 
+@cep(11, "'until' ausente", 
+  "Statement expected", 
   "comp.Compiler.repeatStat()")
 
 class Program

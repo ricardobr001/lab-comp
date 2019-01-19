@@ -2,7 +2,7 @@
     Breno V. V. de Oliveira
     breno.oliveira@dcomp.sor.ufscar.br
 */
-@cep(8, "Uso de operadores logicos com inteiros", 
+@cep(9, "Uso de operadores logicos com inteiros", 
    "type 'int' does not support operator '&&'",  "comp.Compiler.term()")
   
 

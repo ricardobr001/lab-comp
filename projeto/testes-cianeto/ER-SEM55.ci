@@ -4,8 +4,8 @@
 class A
 end
 
-class Program {
+class Program 
     func run {
         Out.println: A.new ++ 0;
     }
-}
+end

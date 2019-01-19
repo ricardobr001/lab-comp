@@ -1,4 +1,4 @@
-@cep(7, "Falta um ';' após a primeira atribuição", "';' expected")
+@cep(8, "Falta um ';' após a primeira atribuição", "';' expected")
 
 class Program
 

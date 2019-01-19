@@ -11,7 +11,7 @@ class A
     var Int result
      
     func mult -> Int { return self.num1 * self.num2; }
-    func div: Int num3, num4 { result = num3 / num4; }
+    func div: Int num3, Int num4 { self.result = num3 / num4; }
 end
 
 class B
