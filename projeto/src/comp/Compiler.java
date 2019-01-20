@@ -216,7 +216,7 @@ public class Compiler {
             CianetoClass dad = symbolTable.returnClass(superclassName);
 
             if (dad == null) {
-                error("Did not find class '" + superclassName + "', class '" + cianetoClass.getName() + "' cannot extends a closed class or not decleared class");
+                error("Did not find class '" + superclassName + "', class '" + cianetoClass.getName() + "' cannot extends a closed class or not declared class");
             }
 
             // Salvando a classe pai da classe atual
@@ -328,6 +328,11 @@ public class Compiler {
                 error("method '" + methodName + "' was already declared");
             }
 
+            // Verificando se a classe ja possui um atributo declarado com o nome deste metodo, se encontrar lanca um erro
+            if (actualClass.getAttribute(methodName) != null) {
+                error("an attribute was declared using name '" + methodName + "', can't redeclare a method using name '" + methodName + "'");
+            }
+
             // Setando o nome do metodo e seu qualificador, alem de coloca-lo como metodo atual
             method.setName(methodName);
             method.setQualifier(q);
@@ -339,6 +344,40 @@ public class Compiler {
         else if (lexer.token == Token.IDCOLON) {
             // Recuperando o nome do metodo e removendo o ':'
             methodName = lexer.getStringValue().replaceAll(":", "");
+            CianetoClass dad = actualClass.getDad();
+            String dadMethodQualifier = "";
+
+            // Se a classe extende de outra classe
+            while (dad != null) {
+                // Se o pai nao possui o metodo, procura na classe pai,
+                if (dad.getMethod(methodName) == null) {
+                    dad = dad.getDad();
+                } else {
+                    dadMethodQualifier = dad.getMethod(methodName).getQualifier();
+                    break;
+                }
+            }
+
+            // Caso o pai tenha o metodo
+            if (!dadMethodQualifier.equals("")) {
+                // Se tiver o 'public' o metodo na classe atual
+                if (dadMethodQualifier.contains("public")) {
+                    // O metodo deve ter a palava 'override', se nao tiver lanca um erro
+                    if (!q.contains("override")) {
+                        error("'override' expected before '" + methodName + "' in class '" + actualClass.getName() + "'");
+                    }
+                }
+            }
+
+            // Verificando se a classe ja possui esse metodo delcarado, se tiver lanca um erro
+            if (actualClass.getMethod(methodName) != null) {
+                error("method '" + methodName + "' was already declared");
+            }
+
+            // Verificando se a classe ja possui um atributo declarado com o nome deste metodo, se encontrar lanca um erro
+            if (actualClass.getAttribute(methodName) != null) {
+                error("an attribute was declared using name '" + methodName + "', can't redeclare a method using name '" + methodName + "'");
+            }
 
             // Setando o nome do metodo e seu qualificador, alem de coloca-lo como metodo atual
             method.setName(methodName);
@@ -352,8 +391,10 @@ public class Compiler {
         }
 
         if (actualClass.getName().equals("Program")) {
-            if (!actualMethod.getQualifier().equals("public")) {
-                error("method 'run' in class 'Program' must be 'public'");
+            if (actualMethod.getName().equals("run")) {
+                if (!actualMethod.getQualifier().equals("public")) {
+                    error("method 'run' in class 'Program' must be 'public'");
+                }
             }
         }
 
@@ -372,6 +413,17 @@ public class Compiler {
 
         next();
         statementList();
+
+        // Se a classe for a 'Program'
+        if (actualClass.getName().equals("Program")) {
+            // Se o metodo for o 'run'
+            if (actualMethod.getName().equals("run")) {
+                // Se possuir argumentos, lanca um erro
+                if (actualMethod.getParameter().size() != 0) {
+                    error("method 'run' of class 'Program' cannot take parameters");
+                }
+            }
+        }
 
         // Verifica se o token eh diferente '}'
         if (lexer.token != Token.RIGHTCURBRACKET) {
@@ -399,7 +451,7 @@ public class Compiler {
         // Enquanto tiver parametros, chama o paramDec
         while (lexer.token == Token.COMMA) {
             next(); // Consome a ','
-            paramDec(type);
+            paramDec(type());
         }
     }
 
@@ -682,15 +734,19 @@ public class Compiler {
 
         if (e == null) {
             error("'print:' or 'println' must print something");
-        }else if (e.getType().equals("boolean")) {
+        } else if (e.getType().equals("boolean")) {
             error("can't print variable or expression of type boolean");
+        } else if (!e.getType().equals("int") || !e.getType().equals("string")) {
+            error("can't print variable of type '" + e.getType() + "' expected 'int' or 'string'");
         }
     }
 
     // assignExpr ::= Expression [ '=' Expression ]
     private void assignExpr() {
         Expr first = null;
-        if (lexer.token == Token.ID){
+
+        // primaryExpr pode ser 'id' ou 'self' ou 'super'
+        if (lexer.token == Token.ID || lexer.token == Token.SELF || lexer.token == Token.SUPER){
             first = expr();
         } else {
             error("left-hand of assign must be a variable");
@@ -703,6 +759,11 @@ public class Compiler {
 
             if (!first.getType().equals(second.getType())){ // verifica se atribuição é do mesmo tipo
                 error("Incompatible types");
+            }
+        } else {
+            // Caso nao seja uma atribuicao, o first deve ter tipo null, caso contrario lanca um erro
+            if (first != null) {
+                error("using method '" + actualMethod.getName() + "' and not assigning his return value to another variable");
             }
         }
     }
@@ -1038,7 +1099,7 @@ public class Compiler {
                      */
                     String method = lexer.getStringValue();
                     if (actualClass.getDad().getMethod(method) == null){ // verifica se a classe pai tem o metodo
-                        error("Super class haven't this method");
+                        error("super class haven't the method '" + method + "'");
                     }else{
                         if(actualClass.getDad().getMethod(method).getQualifier().equals("private")){
                             error("cannot access this method");
@@ -1052,7 +1113,7 @@ public class Compiler {
                 } else if (lexer.token == Token.IDCOLON){
                     String method = lexer.getStringValue();
                     if (actualClass.getDad().getMethod(method) == null){ // verifica se a classe pai tem o metodo
-                        error("Super class haven't this method");
+                        error("super class haven't the method '" + method + "'");
                     }else{
                         if(actualClass.getDad().getMethod(method).getQualifier().equals("private")){
                             error("cannot access this method");
@@ -1254,6 +1315,49 @@ public class Compiler {
                             actualMethod.getLocal(id).getType().equals("boolean")){
                         error("basic type cannot have methods");
                     } else if (lexer.token == Token.ID) {
+                        // Pode estar chamando um metodo ou um atributo da outra classe
+                        CianetoClass idClass = null;
+                        String methodOrAttr = lexer.getStringValue();
+
+                        if (actualMethod.getLocal(id) != null) {
+                            String idType = actualMethod.getLocal(id).getType();
+                            idClass = symbolTable.returnClass(idType);
+                        }
+
+                        CianetoClass dad = idClass.getDad();
+                        String dadQualifier = "";
+
+                        // Se encontrar um atributo
+                        if (idClass.getAttribute(methodOrAttr) != null) {
+                            // Recupera o tipo desse atributo
+                            auxType = idClass.getAttribute(methodOrAttr).getType();
+                        } else if (idClass.getMethod(methodOrAttr) != null) {
+                            // Recupera o tipo desse metodo
+                            auxType = idClass.getMethod(methodOrAttr).getType();
+                        } else {
+                            // Se nao verifica se a classe possui um pai e procura no pai
+                            while (dad != null) {
+                                if (dad.getMethod(methodOrAttr) == null && dad.getAttribute(methodOrAttr) == null) {
+                                    dad = dad.getDad();
+                                } else if (dad.getMethod(methodOrAttr) != null) {
+                                    dadQualifier = dad.getMethod(methodOrAttr).getQualifier();
+                                    auxType = dad.getMethod(methodOrAttr).getType();
+                                    break;
+                                } else {
+                                    dadQualifier = dad.getAttribute(methodOrAttr).getQualifier();
+                                    auxType = dad.getAttribute(methodOrAttr).getType();
+                                    break;
+                                }
+                            }
+
+                            // Caso o pai tenha o metodo
+                            if (!dadQualifier.equals("")) {
+                                // Se tiver o 'private' no metodo da classe pai, o metodo nao pode ser utilizado na classe filha
+                                if (dadQualifier.contains("private")) {
+                                    error("can't user method or attribute of name '" + id + "' it's a 'private' method or attribute in class '" + dad.getName() + "'");
+                                }
+                            }
+                        }
                         next(); // Consome o 'ID'
                     } else if (lexer.token == Token.IDCOLON) {
                         next(); // Consome o 'IDCOLON'
@@ -1266,6 +1370,8 @@ public class Compiler {
                 } else {
                     if (actualMethod.getLocal(id) != null) {
                         auxType = actualMethod.getLocal(id).getType();
+                    } else if (actualMethod.getParameterById(id) != null) {
+                        auxType = actualMethod.getParameterById(id).getType();
                     } else {
                       error("variable not declared");
                     }
@@ -1317,6 +1423,11 @@ public class Compiler {
             // Enquanto existirem mais Id
             while (lexer.token == Token.ID) {
                 String id = lexer.getStringValue();
+
+                // Se encontrar algo na tabela de attributos, lanca um erro
+                if (actualClass.getAttribute(id) != null) {
+                    error("variable '" + id + "' was already declared");
+                }
 
                 CianetoAttribute a = new CianetoAttribute(id, t, q); // id, type, qualifier
                 actualClass.putAttribute(id, a);
