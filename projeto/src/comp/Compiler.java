@@ -1098,17 +1098,20 @@ public class Compiler {
                      * end
                      */
                     String method = lexer.getStringValue();
-                    if (actualClass.getDad().getMethod(method) == null){ // verifica se a classe pai tem o metodo
+                    CianetoClass dadClass = actualClass.getDad();
+                    if (dadClass != null && dadClass.getMethod(method) == null){ // verifica se a classe pai tem o metodo
                         error("super class haven't the method '" + method + "'");
                     }else{
-                        if(actualClass.getDad().getMethod(method).getQualifier().equals("private")){
+                        if(actualClass.getDad() != null && actualClass.getDad().getMethod(method) != null && actualClass.getDad().getMethod(method).getQualifier().equals("private")){
                             error("cannot access this method");
                             // TODO: verificar a classe pai da pai se tem o attr ou metodo chamado
                         }
                     }
 
                     // Recuperando o tipo do método chamado da classe pai
-                    auxType = actualClass.getDad().getMethod(method).getType();
+                    if (actualClass.getDad() != null && actualClass.getDad().getMethod(method) != null){
+                        auxType = actualClass.getDad().getMethod(method).getType();
+                    }
                     next(); // consome o ID
                 } else if (lexer.token == Token.IDCOLON){
                     String method = lexer.getStringValue();
@@ -1257,7 +1260,11 @@ public class Compiler {
                                 }
 
                                 // Recuperando o tipo a lista de expr
-                                auxType = e.get(0).getType();
+                                if (e.isEmpty()){
+                                    auxType = "void";
+                                } else {
+                                    auxType = e.get(0).getType();
+                                }
                             } else {
                                 error("an Id or IdColon was expected");
                             }
@@ -1269,8 +1276,10 @@ public class Compiler {
                         next(); // consome o ID colon
 
                         List<Expr> e = exprList(); // lista de paramentros
-                        Hashtable<String, Object> params = actualClass.getMethod(method).getParameter(); // lista de paramentros salva no metodo
-
+                        Hashtable<String, Object> params = new Hashtable<>();
+                        if (actualClass.getMethod(method) != null) {
+                             params = actualClass.getMethod(method).getParameter(); // lista de paramentros salva no metodo
+                        }
                         if (e.size() != params.size()){ // verifica se tem a mesma quantidade de parametros
                             error("expected a different number of parameters");
                         }
@@ -1285,7 +1294,11 @@ public class Compiler {
                         }
 
                         // Recuperando o tipo a lista de expr
-                        auxType = e.get(0).getType();
+                        if (e.isEmpty()){
+                            auxType = "void";
+                        } else {
+                            auxType = e.get(0).getType();
+                        }
                     }else {
                         error("an Id or IdColon was expected");
                     }
@@ -1301,7 +1314,7 @@ public class Compiler {
                 // Pode ter ou nao '.'
                 if (lexer.token == Token.DOT) {
                     next(); // consome o '.'
-
+                    CianetoAttribute cianetoAttribute = actualMethod.getLocal(id);
                     // Se nao encontrar o id localmente, esta chamando uma classe
                     if (actualMethod.getLocal(id) == null && actualMethod.getParameterById(id) == null && symbolTable.returnClass(id) != null) {
                         // O unico metodo que pode ser chamado de uma classe eh o 'new'
@@ -1311,9 +1324,11 @@ public class Compiler {
                         } else {
                             error("expected method 'new'");
                         }
-                    } else if (actualMethod.getLocal(id).getType().equals("int") || actualMethod.getLocal(id).getType().equals("string") ||
-                            actualMethod.getLocal(id).getType().equals("boolean")){
-                        error("basic type cannot have methods");
+                    } else if (cianetoAttribute != null){
+                        if (actualMethod.getLocal(id).getType().equals("int") || actualMethod.getLocal(id).getType().equals("string") ||
+                                actualMethod.getLocal(id).getType().equals("boolean")) {
+                            error("basic type cannot have methods");
+                        }
                     } else if (lexer.token == Token.ID) {
                         // Pode estar chamando um metodo ou um atributo da outra classe
                         CianetoClass idClass = null;

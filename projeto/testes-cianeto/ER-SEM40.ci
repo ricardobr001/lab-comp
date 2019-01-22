@@ -3,7 +3,7 @@ Evelin Soares
 evelincontatos@gmail.com
 */
 
-@ce(44, "Erro de tipos. O tipo de 'a', 'A', não é subclasse de 'B', o tipo do parâmetro",
+@cep(44, "Erro de tipos. O tipo de 'a', 'A', não é subclasse de 'B', o tipo do parâmetro",
       "Type error: the type of the real parameter is not subclass of the type of the formal parameter",
       "comp.Compiler.factor()")
 

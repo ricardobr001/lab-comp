@@ -11,7 +11,7 @@ class Program
     func run {
       
         var Int i, j;
-        read: i, j, ;
+        self.read: i, j, ;
        
     }
 

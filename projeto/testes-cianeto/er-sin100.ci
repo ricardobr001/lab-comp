@@ -1,14 +1,14 @@
-﻿/*
+/*
 Vitor Mesquita Fogaça
 vitor.fogaca@outlook.com
 */
-      
-@cep(4, "missing 'return' statement", "missing 'return' statement");
+
+@cep(4, "missing 'return' statement", "missing 'return' statement")
 class Teste
     var Int n;
-    
+
     func get -> Int { }
-    
+
     func set: Int n {
         self.n = n;
     }

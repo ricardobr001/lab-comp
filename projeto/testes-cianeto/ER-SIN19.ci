@@ -1,4 +1,4 @@
-@cep(7, "Falta um ';' para finalizar a exp 'Int.readInt(i)' ")
+@cep(7, "Falta um ';' para finalizar a exp 'Int.readInt(i)' ", "';' missing")
 
 class Program
 

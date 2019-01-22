@@ -1,4 +1,4 @@
-@cep(11, "An overridden method should be preceded by 'override'"
+@cep(11, "An overridden method should be preceded by 'override'",
          "'override' expected before overridden method")
 
 open 
