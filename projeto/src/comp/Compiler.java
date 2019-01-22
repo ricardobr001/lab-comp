@@ -50,7 +50,7 @@ public class Compiler {
                 lexer.token == Token.ANNOT) {
             try {
                 // Aqui -- { annot }, nenhuma anotacao ou varias
-                while (lexer.token == Token.ANNOT) {
+                while (lexer.token != Token.CLASS && lexer.token == Token.ANNOT) {
                     annot(metaobjectCallList);
                 }
 
@@ -59,7 +59,7 @@ public class Compiler {
             } catch (CompilerError e) {
                 // if there was an exception, there is a compilation error
                 thereWasAnError = true;
-                while (lexer.token != Token.CLASS && lexer.token != Token.EOF) {
+                while (lexer.token == Token.CLASS && lexer.token != Token.EOF) {
                     try {
                         next();
                     } catch (RuntimeException ee) {
@@ -74,9 +74,12 @@ public class Compiler {
 
         }
 
-        // TODO: Dando erro no java, nao escreve no arquivo 'report.txt', investigar!!
-        if (symbolTable.returnClass("Program") == null) {
-            error("class 'Program' was not found in this file");
+        try {// TODO: Dando erro no java, nao escreve no arquivo 'report.txt', investigar!!
+	        if (symbolTable.returnClass("Program") == null) {
+	            error("class 'Program' was not found in this file");
+	        }
+        } catch (CompilerError e) {
+        	thereWasAnError = true;
         }
 
         if (!thereWasAnError && lexer.token != Token.EOF) {
@@ -400,6 +403,12 @@ public class Compiler {
 
         // Se encontrar '->', o metodo retorna alguma coisa
         if (lexer.token == Token.MINUS_GT) {
+        	if (actualClass.getName().equals("Program")) {
+	        	if (method.getName().equals("run")) {
+	        		error("method 'run' of class 'Program' with a return value");
+	        	}
+        	}
+        	
             // method declared a return type
             next();
             String t = type();
@@ -757,12 +766,14 @@ public class Compiler {
             next(); // Le o token '='
             Expr second = expr();
 
-            if (!first.getType().equals(second.getType())){ // verifica se atribuição é do mesmo tipo
-                error("Incompatible types");
+            if (!first.getType().equals("null") && !second.getType().equals("null")) {
+	            if (!first.getType().equals(second.getType())){ // verifica se atribuição é do mesmo tipo
+	                error("Incompatible types");
+	            }
             }
         } else {
             // Caso nao seja uma atribuicao, o first deve ter tipo null, caso contrario lanca um erro
-            if (first != null) {
+            if (first.getType() != null) {
                 error("using method '" + actualMethod.getName() + "' and not assigning his return value to another variable");
             }
         }
@@ -1305,7 +1316,7 @@ public class Compiler {
                 }
                 break;
             case IN: // Aparentemente está certo, a analise sintatica verifica se eh 'int' ou 'string'
-                readExpr();
+                auxType = readExpr();
                 break;
             case ID: // TODO validacoes
                 String id = lexer.getStringValue();
@@ -1328,6 +1339,40 @@ public class Compiler {
                         if (actualMethod.getLocal(id).getType().equals("int") || actualMethod.getLocal(id).getType().equals("string") ||
                                 actualMethod.getLocal(id).getType().equals("boolean")) {
                             error("basic type cannot have methods");
+                        } else {
+                        	// Esta chamando o metodo do objeto
+                        	if (actualMethod.getLocal(id) != null) {
+                        		String objType = actualMethod.getLocal(id).getType();
+                        		CianetoClass obj = symbolTable.returnClass(objType);
+//                        		String foo = "";
+                        		
+                        		// Esta chamando um metodo
+                        		if (lexer.token == Token.IDCOLON) {
+                        			String objMethodName = lexer.getStringValue().replaceAll(":", "");
+                        			if (obj.getMethod(objMethodName) == null) {
+                        				error("method '" + objMethodName + "' not found on class '" + obj.getName() + "'");
+                        			}
+                        		} else {
+                        			// Pode ser um metodo ou atributo
+                        			String message = lexer.getStringValue();
+                        			
+                        			if (obj.getMethod(message) == null) {
+                        				if (obj.getAttribute(message) == null) {
+                        					error("attribute or method '" + message + "' not found on class '" + obj.getName() + "'");
+                        				}
+                        			} else  {
+                        				auxType = obj.getMethod(message).getType();
+                        			}
+                        		}
+                        		next();
+                        		
+                        		
+                        	} else if (actualMethod.getParameterById(id) != null){
+                        		String objType = actualMethod.getParameterById(id).getType();
+                        		CianetoClass obj = symbolTable.returnClass(objType);
+                        	} else {
+                        		error("identifier '" + id + "' not found on the method '" + actualMethod.getName() +"'");
+                        	}
                         }
                     } else if (lexer.token == Token.ID) {
                         // Pode estar chamando um metodo ou um atributo da outra classe
@@ -1383,7 +1428,9 @@ public class Compiler {
                         error("An Id, IdColon or new was expected after '.'");
                     }
                 } else {
-                    if (actualMethod.getLocal(id) != null) {
+                	if (id.equals("nil")) {
+                		auxType = "null";
+                	} else if (actualMethod.getLocal(id) != null) {
                         auxType = actualMethod.getLocal(id).getType();
                     } else if (actualMethod.getParameterById(id) != null) {
                         auxType = actualMethod.getParameterById(id).getType();
@@ -1414,15 +1461,22 @@ public class Compiler {
     }
 
     // readExpr ::= 'In' '.' [ 'readInt' | 'readString' ]
-    private void readExpr() {
+    private String readExpr() {
+    	String auxType = "";
         next(); // consome o 'In', verificou na chamada anterior
         check(Token.DOT, "a '.' was expected after 'In'");
         next(); // consome o '.'
-        if (lexer.token == Token.READINT || lexer.token == Token.READSTRING){
+        if (lexer.token == Token.READINT){
             next();
-        } else {
+            auxType = "int";
+        } else if (lexer.token == Token.READSTRING) {
+        	next();
+        	auxType = "string";
+        } else {   
             error("expected 'readInt' or 'readString' after '.'");
         }
+        
+        return auxType;
     }
 
     // fieldDec ::= 'var' Type IdList ';'
@@ -1569,4 +1623,5 @@ public class Compiler {
     private CianetoClass actualClass;
     private CianetoMethod actualMethod;
     private boolean WHILEFLAG = false, IFFLAG = false, REPEATUNTILFLAG = false, RETURNFLAG = false;
+    private Hashtable<String, Object> nullObjects;
 }
