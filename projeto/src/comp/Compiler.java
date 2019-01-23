@@ -427,12 +427,14 @@ public class Compiler {
         IFFLAG = new ArrayList<Boolean>();
         WHILEFLAG = new ArrayList<Boolean>();
         REPEATUNTILFLAG = new ArrayList<Boolean>();
+        ELSEFLAG = new ArrayList<Boolean>();
         
         statementList();
         
         IFFLAG = null;
         WHILEFLAG = null;
         REPEATUNTILFLAG = null;
+        ELSEFLAG = null;
 
         // Se a classe for a 'Program'
         if (actualClass.getName().equals("Program")) {
@@ -532,8 +534,10 @@ public class Compiler {
                 checkSemiColon = false;
                 break;
             case RETURN:
-                if (IFFLAG.size() != 0 || WHILEFLAG.size() != 0 || REPEATUNTILFLAG.size() != 0) {
-                    RETURNFLAG = false;
+            	if (IFFLAG.size() == 1 && ELSEFLAG.size() == 1){
+                    RETURNFLAG = true;
+                } else if (IFFLAG.size() != 0 || WHILEFLAG.size() != 0 || REPEATUNTILFLAG.size() != 0) {
+                	RETURNFLAG = false;
                 } else {
                     RETURNFLAG = true;
                 }
@@ -680,7 +684,30 @@ public class Compiler {
     private void returnStat() {
         next(); // le o token 'return'
         Expr e = expr();
-        if (!e.getType().equals(actualMethod.getType())){ // verifica se o retorno do metodo e do mesmo tipo da expressao
+        
+    	String secondType = e.getType();
+    	CianetoClass secondClass = symbolTable.returnClass(secondType);
+    	boolean herda = false;
+    	if (!secondType.equals("int") && !secondType.equals("string") && !secondType.equals("boolean")) {
+    		if (secondClass != null) {
+        		
+    			CianetoClass dadSecond = secondClass.getDad();
+    			
+    			while (dadSecond != null) {
+    				if (dadSecond.getName().equals(actualMethod.getType())) {
+    					herda = true;
+    					break;
+    				}
+    				
+    				dadSecond = dadSecond.getDad();
+    			}
+    			
+        	} else {
+        		error("class '" + secondType + "' not found");
+        	}	
+    	}
+        
+        if (!e.getType().equals(actualMethod.getType()) && !herda){ // verifica se o retorno do metodo e do mesmo tipo da expressao
             error("expression not compatible to method return");
         }
     }
@@ -737,9 +764,13 @@ public class Compiler {
 
             next();
             
+            ELSEFLAG.add(true);
+            
             while (lexer.token != Token.RIGHTCURBRACKET) {
             	statement();
             }
+            
+            ELSEFLAG.remove(0);
 
             check(Token.RIGHTCURBRACKET, "'}' was expected");
             next();
@@ -1097,7 +1128,45 @@ public class Compiler {
                     String method = lexer.getStringValue();
                     CianetoClass dadClass = actualClass.getDad();
                     if (dadClass != null && dadClass.getMethod(method) == null){ // verifica se a classe pai tem o metodo
-                        error("super class haven't the method '" + method + "'");
+                    	CianetoClass dad = actualClass.getDad();
+                        String dadQualifier = "";
+                        boolean attr = false;
+
+                        while (dad != null) {
+        	                // Se o pai nao possui o metodo/attr, procura na classe pai
+        	                if (dad.getMethod(method) == null && dad.getAttribute(method) == null) {
+        	                    dad = dad.getDad();
+        	                } else {
+        	                	if (dad.getMethod(method) == null) {
+        	                		dadQualifier = dad.getAttribute(method).getQualifier();
+        	                		attr = true;
+        	                		auxType = dad.getAttribute(method).getType();
+        	                	} else {
+        	                		dadQualifier = dad.getMethod(method).getQualifier();
+        	                		auxType = dad.getMethod(method).getType();
+        	                	}
+        	                    break;
+        	                }
+        	            }
+        	            
+        	            // Caso o pai tenha o metodo ou attr
+        	            if (!dadQualifier.equals("")) {
+        	                // Se tiver o 'public' o metodo na classe atual
+        	                if (dadQualifier.contains("public")) {
+        	                    // O metodo deve ter a palava 'override', se nao tiver lanca um erro
+        	                    // do nothing
+        	                } else {
+        	                	// Se nao possui 'public', eh 'private'
+        	                	if (attr) {
+        	                		error("attribute is 'private' in superclass '" + dad.getName() + "', can't be accessed by class '" + actualClass.getName() + "'");
+        	                	} else {
+        	                		error("method is 'private' in superclass '" + dad.getName() + "', can't be accessed by class '" + actualClass.getName() + "'");
+        	                	}
+        	                }
+        	            } else {
+        	            	error("method or attribute not found");
+        	            }
+//                        error("super class haven't the method '" + method + "'");
                     }else{
                         if(actualClass.getDad() != null && actualClass.getDad().getMethod(method) != null && actualClass.getDad().getMethod(method).getQualifier().equals("private")){
                             error("cannot access this method");
@@ -1201,7 +1270,41 @@ public class Compiler {
                         	// Recuperando o tipo do metodo ou attr
                             auxType = actualClass.getMethod(value).getType();
                         } else {
-                            auxType = actualClass.getAttribute(value).getType();
+                        	String classType = actualClass.getAttribute(value).getType();
+                        	
+                        	if (lexer.token == Token.DOT) {
+                        		next(); // Consome o '.'
+                        		if (lexer.token == Token.ID) {
+                        			String message = lexer.getStringValue();
+                        			
+                        			CianetoClass auxClass = symbolTable.returnClass(classType);
+                        			
+                        			if (auxClass != null) {
+                        				if (auxClass.getMethod(message) != null) {
+                        					auxType = auxClass.getMethod(message).getType();
+                        				} else if (auxClass.getAttribute(message) != null) {
+                        					auxType = auxClass.getAttribute(message).getType();
+                        				} else {
+                        					error("Attribute or method '" + message + "' not found on class '" + auxClass.getName() + "'");
+                        				}
+//                        				auxType = auxClass.getMethod(key)
+                        			} else {
+                        				if (actualClass.getAttribute(message) != null) {
+                        					auxType = actualClass.getAttribute(message).getType();
+                        				} else if (actualClass.getMethod(message) != null) {
+                        					auxType = actualClass.getMethod(message).getType();
+                        				} else {
+                        					error("Attribute or method '" + message + "' not found on class '" + actualClass.getName() + "'");
+                        				}
+//                        				auxClass.getAttribute(key)
+                        			}
+                        			next();
+                        		}
+                        	} else {
+                        		auxType = actualClass.getAttribute(value).getType();
+                        	}
+//                        	if
+                            
                         }
 
                         if (lexer.token == Token.DOT){
@@ -1323,9 +1426,31 @@ public class Compiler {
                         int i = 0;
                         for (String key: keyParams){ // verifica se tem o mesmo tipo
                             CianetoAttribute c = (CianetoAttribute) params.get(key);
-                            if (!c.getType().equals(e.get(i).getType())){
+                            String cType = c.getType();
+                            String eType = e.get(i).getType();
+                            boolean herda = false;
+                            
+                            if (!eType.equals("int") && !eType.equals("string") && !eType.equals("boolean")) {
+                        		if (eType != null) {
+                            		
+                        			CianetoClass dadSecond = symbolTable.returnClass(eType);
+                        			
+                        			while (dadSecond != null) {
+                        				if (dadSecond.getName().equals(cType)) {
+                        					herda = true;
+                        					break;
+                        				}
+                        				
+                        				dadSecond = dadSecond.getDad();
+                        			}
+                        			
+                            	}
+                        	}
+                            
+                            if (!c.getType().equals(e.get(i).getType()) && !herda){
                                 error("incompatible types in parameters");
                             }
+                            i++;
                         }
 
                         // Recuperando o tipo a lista de expr
@@ -1513,7 +1638,7 @@ public class Compiler {
                         		next();
                         		
                         		if (possuiParametros) {
-                        			exprList();	
+                        			List<Expr> e = exprList();	
                         		}
                         	} else if (actualMethod.getParameterById(id) != null){
                         		String objType = actualMethod.getParameterById(id).getType();
@@ -1568,9 +1693,28 @@ public class Compiler {
                         }
                         next(); // Consome o 'ID'
                     } else if (lexer.token == Token.IDCOLON) {
+                    	String methodName = lexer.getStringValue().replaceAll(":", "");
+                    	
+                    	if (actualMethod.getLocal(id) != null || actualMethod.getParameterById(id) != null) {
+                    		CianetoAttribute atribute = actualMethod.getLocal(id);
+                    		if (atribute != null) {
+                    			CianetoClass auxClass = symbolTable.returnClass(atribute.getType());
+                    			auxType = auxClass.getMethod(methodName).getType();
+                    		} else {
+                    			atribute = actualMethod.getParameterById(id);
+                    			CianetoClass auxClass = symbolTable.returnClass(atribute.getType());
+                    			auxType = auxClass.getMethod(methodName).getType();
+                    		}
+                    	} else {
+                    		error("variable '" + id + "' not declared");
+                    	}
+                    	
                         next(); // Consome o 'IDCOLON'
-                        exprList();
+                        List<Expr> e = exprList();
+                        
+//                        auxType = 
                     } else if (lexer.token == Token.NEW) {
+
                         next();
                     } else {
                         error("An Id, IdColon or new was expected after '.'");
@@ -1774,6 +1918,7 @@ public class Compiler {
     private CianetoClass actualClass;
     private CianetoMethod actualMethod;
     private ArrayList<Boolean> IFFLAG;
+    private ArrayList<Boolean> ELSEFLAG;
     private ArrayList<Boolean> WHILEFLAG;
     private ArrayList<Boolean> REPEATUNTILFLAG;
     private boolean RETURNFLAG;
